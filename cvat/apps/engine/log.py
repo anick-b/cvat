@@ -32,7 +32,7 @@ class _LoggerAdapterMapping:
 class ServerLogManager:
     def __init__(self, logger_name: str) -> None:
         self.glob = logging.getLogger(logger_name)
-        self.project = _LoggerAdapterMapping(self.glob, "Project")
+        self.project = _LoggerAdapterMapping(self.glob, "MyCustomProject")
         self.task = _LoggerAdapterMapping(self.glob, "Task")
         self.job = _LoggerAdapterMapping(self.glob, "Job")
         self.cloud_storage = _LoggerAdapterMapping(self.glob, "CloudStorage")

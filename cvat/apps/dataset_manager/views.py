@@ -18,7 +18,7 @@ from rq_scheduler import Scheduler
 
 import cvat.apps.dataset_manager.project as project
 import cvat.apps.dataset_manager.task as task
-from cvat.apps.engine.log import ServerLogManager
+from cvat.apps.engine.log import ServerLogManager, _LoggerAdapterMapping
 from cvat.apps.engine.models import Job, Project, Task
 from cvat.apps.engine.rq import ExportRQMeta
 from cvat.apps.engine.utils import get_rq_lock_by_user
