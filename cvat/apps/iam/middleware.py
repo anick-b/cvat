@@ -81,7 +81,7 @@ class SessionRefreshMiddleware:
     Must be listed after SessionMiddleware in the MIDDLEWARE list.
     """
 
-    _REFRESH_INTERVAL = timedelta(seconds=30)  # Refresh every 30 seconds to work with 1-minute timeout
+    _REFRESH_INTERVAL = timedelta(days=1)
     _COOKIE_NAME = "sessionfresh"
 
     def __init__(self, get_response: Callable[[HttpRequest], HttpResponse]) -> None:
@@ -90,9 +90,6 @@ class SessionRefreshMiddleware:
     def __call__(self, request: HttpRequest) -> HttpResponse:
         response = self.get_response(request)
 
-        # For testing 1-minute timeout, disable session refresh entirely
-        # Comment out the entire session refresh logic
-        """
         shared_cookie_args = {
             "key": self._COOKIE_NAME,
             "domain": getattr(settings, "SESSION_COOKIE_DOMAIN"),
@@ -128,6 +125,5 @@ class SessionRefreshMiddleware:
 
         # Force SessionMiddleware to re-save the session.
         request.session.modified = True
-        """
 
         return response
