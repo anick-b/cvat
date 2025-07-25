@@ -1,32 +1,49 @@
-# Copyright (C) 2018-2022 Intel Corporation
-#
-# SPDX-License-Identifier: MIT
+version: '3.3'
 
 services:
   cvat_server:
     labels:
-      traefik.http.routers.cvat.entrypoints: websecure
-      traefik.http.routers.cvat.tls.certresolver: lets-encrypt
+      - traefik.http.routers.cvat.entrypoints=websecure
+      - traefik.http.routers.cvat.tls=true
+      # - traefik.http.routers.cvat.tls.certresolver=lets-encrypt
 
   cvat_ui:
     labels:
-      traefik.http.routers.cvat-ui.entrypoints: websecure
-      traefik.http.routers.cvat-ui.tls.certresolver: lets-encrypt
+      - traefik.http.routers.cvat-ui.entrypoints=websecure
+      - traefik.http.routers.cvat-ui.tls=true
+      # - traefik.http.routers.cvat-ui.tls.certresolver=lets-encrypt
 
   traefik:
-    environment:
-      TRAEFIK_ENTRYPOINTS_web_ADDRESS: :80
-      TRAEFIK_ENTRYPOINTS_web_HTTP_REDIRECTIONS_ENTRYPOINT_TO: websecure
-      TRAEFIK_ENTRYPOINTS_web_HTTP_REDIRECTIONS_ENTRYPOINT_SCHEME: https
-      TRAEFIK_ENTRYPOINTS_websecure_ADDRESS: :443
-      TRAEFIK_CERTIFICATESRESOLVERS_lets-encrypt_ACME_EMAIL: "${ACME_EMAIL:?Please set the ACME_EMAIL env variable}"
-      TRAEFIK_CERTIFICATESRESOLVERS_lets-encrypt_ACME_TLSCHALLENGE: "true"
-      TRAEFIK_CERTIFICATESRESOLVERS_lets-encrypt_ACME_STORAGE: /letsencrypt/acme.json
+    image: traefik:v2.4
+    container_name: traefik
+    command:
+      - "--providers.docker.exposedByDefault=false"
+      - "--providers.docker.network=cvat"
+      - '--providers.file.directory=/etc/traefik/rules'
+      - "--entryPoints.web.address=:80"
+      - "--entryPoints.web.http.redirections.entryPoint.to=websecure"
+      - "--entryPoints.web.http.redirections.entryPoint.scheme=https"
+      - "--entryPoints.websecure.address=:443"
+      - "--providers.file.directory=/etc/traefik/dynamic_conf"
+      - "--providers.file.watch=true"
+      # - "--certificatesResolvers.lets-encrypt.acme.email=${ACME_EMAIL:?Please set the ACME_EMAIL env variable}"
+      # - "--certificatesResolvers.lets-encrypt.acme.tlsChallenge=true"
+      # - "--certificatesResolvers.lets-encrypt.acme.storage=/letsencrypt/acme.json"
+      # Uncomment to get Traefik dashboard
+      # - "--entryPoints.dashboard.address=:8090"
+      # - "--api.dashboard=true"
     ports:
       - 80:80
       - 443:443
     volumes:
-      - cvat_letsencrypt:/letsencrypt
+      # - cvat_letsencrypt:/letsencrypt
+      - cvat_certs:/certs/:ro
+      - ./traefik.yml:/etc/traefik/dynamic_conf/traefik.yml:ro
 
 volumes:
-  cvat_letsencrypt:
+  # cvat_letsencrypt:
+  cvat_certs:
+    driver_opts:
+      type: none
+      device: /home/sr/Anick/outdu-cvat/cvat_jnj_new/cvat/ssl
+      o: bind

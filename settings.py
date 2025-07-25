@@ -15,7 +15,7 @@ AUTH_LDAP_SERVER_URI = "ldap://192.168.1.143:389"
 _BASE_PATH="dc=example,dc=org"
 # Credentials for LDAP server - using admin account for now
 AUTH_LDAP_BIND_DN = "cn=admin,dc=example,dc=org"
-AUTH_LDAP_BIND_PASSWORD = "admin"
+AUTH_LDAP_BIND_PASSWORD = "newadminpass"
 
 # User search - using uid instead of sAMAccountName for local LDAP
 AUTH_LDAP_USER_SEARCH = LDAPSearch("ou=users,dc=example,dc=org", ldap.SCOPE_SUBTREE, "(uid=%(user)s)")
@@ -23,7 +23,7 @@ AUTH_LDAP_USER_SEARCH = LDAPSearch("ou=users,dc=example,dc=org", ldap.SCOPE_SUBT
 AUTH_LDAP_GROUP_SEARCH = LDAPSearch("ou=Security,ou=IDM,ou=Groups,dc=example,dc=org", ldap.SCOPE_SUBTREE,"(objectClass=*)")
 AUTH_LDAP_GROUP_TYPE = GroupOfNamesType()
 AUTH_LDAP_REQUIRE_GROUP = (
-    LDAPGroupQuery('cn=ITS-NPR-EDGEAI-ADMIN,ou=Security,ou=IDM,ou=Groups,dc=example,dc=org')
+    LDAPGroupQuery('cn=ITS-NPR-EDGEAI-EAIP-ADMIN,ou=Security,ou=IDM,ou=Groups,dc=example,dc=org')
     | LDAPGroupQuery('cn=ITS-NPR-EDGEAI-AICOMODO-BUSINESSOWNER,ou=Security,ou=IDM,ou=Groups,dc=example,dc=org')
     | LDAPGroupQuery('cn=ITS-NPR-EDGEAI-AICOMODO-ENDUSER,ou=Security,ou=IDM,ou=Groups,dc=example,dc=org')
 )
@@ -41,6 +41,16 @@ AUTH_LDAP_FIND_GROUP_PERMS = True
 AUTH_LDAP_CACHE_GROUPS = True
 AUTH_LDAP_GROUP_CACHE_TIMEOUT = 3600
 AUTH_LDAP_AUTHORIZE_ALL_USERS = True
+
+
+# Enable HTTPS-aware settings
+#CSRF_COOKIE_SECURE = True
+#SESSION_COOKIE_SECURE = True
+#SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+
+# Optional: allow all for testing (tighten this in production)
+CSRF_TRUSTED_ORIGINS = ['https://localhost']
 
 # Keep ModelBackend around for per-user permissions and maybe a local
 # superuser.

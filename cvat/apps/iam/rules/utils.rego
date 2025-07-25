@@ -6,6 +6,7 @@ import rego.v1
 ADMIN := "admin"
 USER := "user"
 WORKER := "worker"
+BUSINESS:= "business"
 
 # Visibility of objects
 PUBLIC := "public"
@@ -65,6 +66,7 @@ DOWNLOAD_EXPORTED_FILE := "download:exported_file"
 
 get_priority(privilege) := {
     ADMIN: 0,
+    BUSINESS: 50,
     USER: 75,
     WORKER: 100,
     null: 1000
@@ -76,6 +78,10 @@ has_perm(group) if {
 
 is_admin if {
     input.auth.user.privilege == ADMIN
+}
+
+is_business if {
+    input.auth.user.privilege == BUSINESS
 }
 
 is_user if {

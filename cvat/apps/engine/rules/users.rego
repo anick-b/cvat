@@ -32,9 +32,9 @@ import data.organizations
 
 default allow := false
 
-allow if {
-    utils.is_admin
-}
+#allow if {
+#    utils.is_admin
+#}
 
 allow if {
     input.scope == utils.LIST

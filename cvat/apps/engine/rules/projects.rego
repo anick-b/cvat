@@ -58,9 +58,10 @@ is_project_staff if {
     utils.is_resource_assignee
 }
 
-allow if {
-    utils.is_admin
-}
+#allow if {
+#    utils.is_admin
+#}
+
 
 allow if {
     input.scope in {utils.CREATE, utils.IMPORT_BACKUP}
@@ -73,6 +74,15 @@ allow if {
     input.auth.organization.id == input.resource.organization.id
     utils.has_perm(utils.USER)
     organizations.has_perm(organizations.SUPERVISOR)
+    not utils.is_admin
+}
+
+allow if{
+    input.scope in { utils.CREATE, utils.IMPORT_BACKUP }
+    input.auth.organization.id == input.resource.organization.id
+    utils.has_perm(utils.BUSINESS)
+    organizations.has_perm(organizations.MAINTAINER)
+    not utils.is_admin
 }
 
 allow if {
