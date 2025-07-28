@@ -797,3 +797,15 @@ if ONE_RUNNING_JOB_IN_QUEUE_PER_USER:
     )
 
 USER_LAST_ACTIVITY_UPDATE_MIN_INTERVAL = timedelta(days=1)
+
+# Account lockout settings
+MAX_LOGIN_ATTEMPTS = 3
+ACCOUNT_LOCKOUT_DURATION = timedelta(minutes=15)
+RESET_FAILED_ATTEMPTS_AFTER = timedelta(minutes=30)
+ENABLE_ACCOUNT_LOCKOUT = True
+
+# Cache key prefixes for lockout tracking
+CACHE_LOCKOUT_KEY_PREFIX = "account_lockout_"
+CACHE_FAILED_ATTEMPTS_KEY_PREFIX = "failed_attempts_"
+
+

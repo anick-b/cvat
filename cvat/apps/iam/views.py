@@ -30,6 +30,7 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
 from .authentication import Signer
+from .lockout_utils import is_account_locked, track_failed_attempt, reset_failed_attempts, get_lockout_remaining_time
 from .utils import get_opa_bundle
 
 
@@ -80,6 +81,23 @@ class LoginViewEx(LoginView):
     def post(self, request, *args, **kwargs):
         self.request = request
         self.serializer = self.get_serializer(data=self.request.data)
+
+        # Get identifier (username or email) for lockout tracking
+        identifier = (
+            self.request.data.get("username") or
+            self.request.data.get("email")
+        )
+
+        # Check if account is locked before attempting authentication
+        if identifier and is_account_locked(identifier):
+            remaining_time = get_lockout_remaining_time(identifier)
+            minutes = remaining_time // 60
+            seconds = remaining_time % 60
+            return HttpResponseBadRequest(
+                f"Account is temporarily locked due to too many failed login attempts. "
+                f"Please try again in {minutes} minutes and {seconds} seconds."
+            )
+
         try:
             self.serializer.is_valid(raise_exception=True)
         except ValidationError:
@@ -89,6 +107,9 @@ class LoginViewEx(LoginView):
                 self.serializer.data.get("password"),
             )
             if not user:
+                # Track failed attempt for invalid credentials
+                if identifier:
+                    track_failed_attempt(identifier)
                 raise
 
             # Check that user's email is verified.
@@ -99,8 +120,15 @@ class LoginViewEx(LoginView):
                 # because redirect will make a POST request and we'll get a 404 code
                 # (although in the browser request method will be displayed like GET)
                 return HttpResponseBadRequest("Unverified email")
-        except Exception:  # nosec
-            pass
+        except Exception as e:
+            # Track failed attempt for any authentication error
+            if identifier:
+                track_failed_attempt(identifier)
+            raise
+
+        # Authentication successful - reset failed attempts
+        if identifier:
+            reset_failed_attempts(identifier)
 
         self.login()
         return self.get_response()

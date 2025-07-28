@@ -20,6 +20,7 @@ from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
 from cvat.apps.iam.forms import ResetPasswordFormEx
+from cvat.apps.iam.lockout_utils import is_account_locked, get_lockout_remaining_time
 from cvat.apps.iam.utils import get_dummy_user
 
 
@@ -117,6 +118,16 @@ class PasswordResetSerializerEx(PasswordResetSerializer):
 
 class LoginSerializerEx(LoginSerializer):
     def get_auth_user_using_allauth(self, username, email, password):
+        # Check lockout before authentication
+        identifier = username or email
+        if identifier and is_account_locked(identifier):
+            remaining_time = get_lockout_remaining_time(identifier)
+            minutes = remaining_time // 60
+            seconds = remaining_time % 60
+            raise ValidationError(
+                f"Account is temporarily locked due to too many failed login attempts. "
+                f"Please try again in {minutes} minutes and {seconds} seconds."
+            )
 
         def is_email_authentication():
             return (

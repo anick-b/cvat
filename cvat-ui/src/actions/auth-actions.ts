@@ -104,7 +104,14 @@ export const loginAsync = (credential: string, password: string): ThunkAction =>
         dispatch(authActions.loginSuccess(users[0]));
     } catch (error) {
         const hasEmailVerificationBeenSent = error.message.includes('Unverified email');
+        const isAccountLocked = error.message.includes('Account is temporarily locked');
+
         dispatch(authActions.loginFailed(error, hasEmailVerificationBeenSent));
+
+        // Handle account lockout specifically
+        if (isAccountLocked) {
+            console.log('Account is locked:', error.message);
+        }
     }
 };
 

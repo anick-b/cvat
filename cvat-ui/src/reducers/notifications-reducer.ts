@@ -250,6 +250,8 @@ export default function (state = defaultState, action: AnyAction): Notifications
             };
         }
         case AuthActionTypes.LOGIN_FAILED: {
+            const isAccountLocked = action.payload.error.message.includes('Account is temporarily locked');
+
             return {
                 ...state,
                 errors: {
@@ -257,7 +259,9 @@ export default function (state = defaultState, action: AnyAction): Notifications
                     auth: {
                         ...state.errors.auth,
                         login: {
-                            message: 'Could not login on the server',
+                            message: isAccountLocked
+                                ? 'Account is temporarily locked due to too many failed attempts'
+                                : 'Could not login on the server',
                             reason: action.payload.error,
                             shouldLog: shouldLog(action.payload.error),
                             className: 'cvat-notification-notice-login-failed',

@@ -520,7 +520,7 @@ function HeaderComponent(props: Props): JSX.Element {
                 ) : null}
             </div>
             <div className='cvat-right-header'>
-                <CVATTooltip overlay='Click to open repository'>
+                {/* <CVATTooltip overlay='Click to open repository'>
                     <Button
                         icon={<GithubOutlined />}
                         size='large'
@@ -545,7 +545,7 @@ function HeaderComponent(props: Props): JSX.Element {
                             window.open(GUIDE_URL, '_blank');
                         }}
                     />
-                </CVATTooltip>
+                </CVATTooltip> */}
                 <Dropdown
                     trigger={['click']}
                     destroyPopupOnHide
