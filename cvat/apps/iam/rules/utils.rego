@@ -104,6 +104,10 @@ is_sandbox if {
     input.auth.organization == null
 }
 
+#is_organization if {
+#    input.auth.organization == null
+#}
+
 is_organization if {
     input.auth.organization != null
 }

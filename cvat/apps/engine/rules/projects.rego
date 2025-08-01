@@ -63,11 +63,11 @@ is_project_staff if {
 #}
 
 
-allow if {
-    input.scope in {utils.CREATE, utils.IMPORT_BACKUP}
-    utils.is_sandbox
-    utils.has_perm(utils.USER)
-}
+#allow if {
+#    input.scope in {utils.CREATE, utils.IMPORT_BACKUP}
+#    utils.is_sandbox
+#    utils.has_perm(utils.USER)
+#}
 
 allow if {
     input.scope in {utils.CREATE, utils.IMPORT_BACKUP}
@@ -85,10 +85,10 @@ allow if{
     not utils.is_admin
 }
 
-allow if {
-    input.scope == utils.LIST
-    utils.is_sandbox
-}
+#allow if {
+#    input.scope == utils.LIST
+#    utils.is_sandbox
+#}
 
 allow if {
     input.scope == utils.LIST
@@ -118,11 +118,11 @@ filter := [] if { # Django Q object to filter list of entries
         {"organization": input.auth.organization.id}, "&" ]
 }
 
-allow if {
-    input.scope == utils.VIEW
-    utils.is_sandbox
-    is_project_staff
-}
+#allow if {
+#    input.scope == utils.VIEW
+#    utils.is_sandbox
+#    is_project_staff
+#}
 
 allow if {
     input.scope == utils.VIEW
@@ -139,12 +139,12 @@ allow if {
 }
 
 
-allow if {
-    input.scope in {utils.DELETE, utils.UPDATE_ORG, utils.UPDATE_ASSOCIATED_STORAGE}
-    utils.is_sandbox
-    utils.has_perm(utils.WORKER)
-    utils.is_resource_owner
-}
+#allow if {
+#    input.scope in {utils.DELETE, utils.UPDATE_ORG, utils.UPDATE_ASSOCIATED_STORAGE}
+#    utils.is_sandbox
+#    utils.has_perm(utils.WORKER)
+#    utils.is_resource_owner
+#}
 
 allow if {
     input.scope in {utils.DELETE, utils.UPDATE_ORG, utils.UPDATE_ASSOCIATED_STORAGE}
@@ -161,12 +161,12 @@ allow if {
     organizations.is_staff
 }
 
-allow if {
-    input.scope in {utils.UPDATE_DESC, utils.IMPORT_DATASET}
-    utils.is_sandbox
-    is_project_staff
-    utils.has_perm(utils.WORKER)
-}
+#allow if {
+#    input.scope in {utils.UPDATE_DESC, utils.IMPORT_DATASET}
+#    utils.is_sandbox
+#    is_project_staff
+#    utils.has_perm(utils.WORKER)
+#}
 
 allow if {
     input.scope in {utils.UPDATE_DESC, utils.IMPORT_DATASET}
@@ -183,12 +183,12 @@ allow if {
     organizations.is_member
 }
 
-allow if {
-    input.scope == utils.UPDATE_ASSIGNEE
-    utils.is_sandbox
-    utils.is_resource_owner
-    utils.has_perm(utils.WORKER)
-}
+#allow if {
+#    input.scope == utils.UPDATE_ASSIGNEE
+#    utils.is_sandbox
+#    utils.is_resource_owner
+#    utils.has_perm(utils.WORKER)
+#}
 
 allow if {
     input.scope == utils.UPDATE_ASSIGNEE
@@ -220,11 +220,11 @@ allow if {
     organizations.is_staff
 }
 
-allow if {
-    input.scope in {utils.EXPORT_ANNOTATIONS, utils.EXPORT_DATASET, utils.EXPORT_BACKUP}
-    utils.is_sandbox
-    is_project_staff
-}
+#allow if {
+#    input.scope in {utils.EXPORT_ANNOTATIONS, utils.EXPORT_DATASET, utils.EXPORT_BACKUP}
+#    utils.is_sandbox
+#    is_project_staff
+#}
 
 allow if {
     input.scope in {utils.EXPORT_ANNOTATIONS, utils.EXPORT_DATASET, utils.EXPORT_BACKUP}
