@@ -31,15 +31,15 @@ import data.organizations
 # }
 
 default allow := false
-
-allow if {
-    utils.is_admin
-}
-
-allow if {
-    input.scope == utils.LIST
-    utils.is_sandbox
-}
+                                    #Comment - Deny Admin
+#allow if {
+#    utils.is_admin
+#}
+                                    #Comment - Deny sandbox
+#allow if {
+#    input.scope == utils.LIST
+#    utils.is_sandbox
+#}
 
 allow if {
     input.scope == utils.LIST
@@ -47,7 +47,7 @@ allow if {
 }
 
 filter := [] if { # Django Q object to filter list of entries
-    utils.is_sandbox
+ #   utils.is_sandbox              #Comment - Deny sandbox
     utils.is_admin
 } else := qobject if {
     utils.is_sandbox
@@ -73,7 +73,7 @@ filter := [] if { # Django Q object to filter list of entries
 allow if {
     input.scope == utils.CREATE
     input.auth.organization.id == input.resource.organization.id
-    utils.has_perm(utils.USER)
+    utils.has_perm(utils.BUSINESS)                               #Modifed USER->BUSINESS (MAINTAINER role)
     input.auth.organization.user.role == organizations.MAINTAINER
     # a maintainer cannot invite an user with owner or  maintainer roles
     input.resource.role != organizations.OWNER
@@ -84,23 +84,35 @@ allow if {
 allow if {
     input.scope == utils.CREATE
     input.auth.organization.id == input.resource.organization.id
-    utils.has_perm(utils.USER)
-    organizations.is_owner
-    # it isn't possible to create one more owner at the moment
+    utils.has_perm(utils.ADMIN)
+    # a maintainer cannot invite an user with owner or  maintainer roles
     input.resource.role != organizations.OWNER
+    input.resource.role != organizations.SUPERVISOR
+    input.resource.role != organizations.WORKER
 }
 
-allow if {
-    input.scope == utils.VIEW
-    utils.is_sandbox
-    utils.is_resource_owner
-}
 
-allow if {
-    input.scope == utils.VIEW
-    utils.is_sandbox
-    input.resource.invitee.id == input.auth.user.id
-}
+                                        #Comment- Deny scope for USER
+#allow if {
+#    input.scope == utils.CREATE
+#    input.auth.organization.id == input.resource.organization.id
+#    utils.has_perm(utils.USER)
+#    organizations.is_owner
+#    # it isn't possible to create one more owner at the moment
+#    input.resource.role != organizations.OWNER
+#}
+                                        #Comment- Deny sandbox scope
+#allow if {
+#    input.scope == utils.VIEW
+#    utils.is_sandbox
+#    utils.is_resource_owner
+#}
+                                        #Comment- Deny sandbox scope
+#allow if {
+#    input.scope == utils.VIEW
+#    utils.is_sandbox
+#    input.resource.invitee.id == input.auth.user.id
+#}
 
 allow if {
     input.scope == utils.VIEW
@@ -120,13 +132,13 @@ allow if {
     input.auth.organization.id == input.resource.organization.id
     input.resource.invitee.id == input.auth.user.id
 }
-
-allow if {
-    input.scope == utils.RESEND
-    utils.has_perm(utils.WORKER)
-    utils.is_sandbox
-    utils.is_resource_owner
-}
+                                        #Comment- Deny sandbox privilege
+#allow if {
+#    input.scope == utils.RESEND
+#    utils.has_perm(utils.WORKER)
+#    utils.is_sandbox
+#    utils.is_resource_owner
+#}
 
 allow if {
     input.scope == utils.RESEND
@@ -134,20 +146,20 @@ allow if {
     utils.has_perm(utils.USER)
     organizations.is_staff
 }
-
-allow if {
-    input.scope == utils.RESEND
-    input.auth.organization.id == input.resource.organization.id
-    utils.has_perm(utils.WORKER)
-    utils.is_resource_owner
-}
-
-allow if {
-    input.scope == utils.DELETE
-    utils.is_sandbox
-    utils.has_perm(utils.WORKER)
-    utils.is_resource_owner
-}
+                                        #Comment-> Deny USER scope
+#allow if {
+#    input.scope == utils.RESEND
+#    input.auth.organization.id == input.resource.organization.id
+#    utils.has_perm(utils.WORKER)        #Change WORKER->USER(inb)
+#    utils.is_resource_owner
+#}
+                                        #Comment- Deny sandbox privilege
+#allow if {
+#    input.scope == utils.DELETE
+#    utils.is_sandbox
+#    utils.has_perm(utils.WORKER)      #Change WORKER->USER(inb)
+#    utils.is_resource_owner
+#}
 
 allow if {
     input.scope == utils.DELETE
@@ -155,20 +167,20 @@ allow if {
     utils.has_perm(utils.USER)
     organizations.is_staff
 }
+                                        #Comment-> Deny USER scope
+#allow if {
+#    input.scope == utils.DELETE
+#    input.auth.organization.id == input.resource.organization.id
+#    utils.has_perm(utils.WORKER)      #Change WORKER->USER(inb)
+#   utils.is_resource_owner
+#}
 
-allow if {
-    input.scope == utils.DELETE
-    input.auth.organization.id == input.resource.organization.id
-    utils.has_perm(utils.WORKER)
-    utils.is_resource_owner
-}
-
-
-allow if {
-    input.scope in {utils.ACCEPT, utils.DECLINE}
-    input.resource.invitee.id == input.auth.user.id
-    utils.is_sandbox
-}
+                                        #Comment sandbox privilege
+#allow if {
+#    input.scope in {utils.ACCEPT, utils.DECLINE}
+#    input.resource.invitee.id == input.auth.user.id
+#    utils.is_sandbox
+#}
 
 allow if {
     input.scope in {utils.ACCEPT, utils.DECLINE}

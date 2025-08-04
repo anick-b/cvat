@@ -31,15 +31,15 @@ import data.organizations
 # }
 
 default allow := false
-
-allow if {
-    utils.is_admin
-}
-
-allow if {
-    input.scope == utils.LIST
-    utils.is_sandbox
-}
+                                        #Comment- Admin privilege
+#allow if {
+#    utils.is_admin
+#}
+                                        #Comment-> Deny sandbox privilege
+#allow if {
+#    input.scope == utils.LIST
+#    utils.is_sandbox
+#}
 
 allow if {
     input.scope == utils.LIST
@@ -64,13 +64,13 @@ filter := [] if { # Django Q object to filter list of entries
     org_id := input.auth.organization.id
     qobject := [ {"organization": org_id}, {"is_active": true}, "&" ]
 }
-
-allow if {
-    input.scope == utils.VIEW
-    input.resource.is_active
-    utils.is_sandbox
-    input.resource.user.id == input.auth.user.id
-}
+                            #Comment-> Deny sandbox -> scope
+#allow if {
+#    input.scope == utils.VIEW
+#    input.resource.is_active
+#    utils.is_sandbox
+#    input.resource.user.id == input.auth.user.id
+#}
 
 allow if {
     input.scope == utils.VIEW
@@ -84,7 +84,7 @@ allow if {
     organizations.is_member
     input.resource.organization.id == input.auth.organization.id
 }
-
+                                        #Verify business logic
 # maintainer of the organization can change the role of any member and remove any member except
 # himself/another maintainer/owner
 allow if {
@@ -99,7 +99,7 @@ allow if {
     input.resource.user.id != input.auth.user.id
 }
 
-
+                                        #Verify business logic
 # owner of the organization can change the role of any member and remove any member except himself
 allow if {
     input.scope in {utils.CHANGE_ROLE, utils.DELETE}
@@ -109,7 +109,7 @@ allow if {
     input.resource.user.id != input.auth.user.id
     input.resource.role != organizations.OWNER
 }
-
+                                      #Verify business logic
 # member can leave the organization except case when member is the owner
 allow if {
     input.scope == utils.DELETE

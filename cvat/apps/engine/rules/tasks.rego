@@ -6,35 +6,10 @@ import data.utils
 import data.organizations
 
 # input: {
-#     "scope": <
-#              "create"|
-#              "create@project"|
-#              "delete:annotations"|
-#              "delete"|
-#              "download:exported_file"|
-#              "export:annotations"|
-#              "export:backup"|
-#              "export:dataset"|
-#              "import:annotations"|
-#              "import:backup"|
-#              "list"|
-#              "update:annotations"|
-#              "update:assignee"|
-#              "update:associated_storage"|
-#              "update:desc"|
-#              "update:metadata"|
-#              "update:organization"|
-#              "update:owner"|
-#              "update:project"|
-#              "update:validation_layout"|
-#              "update"|
-#              "upload:data"|
-#              "view:annotations"|
-#              "view:data"|
-#              "view:metadata"|
-#              "view:validation_layout"|
-#              "view"|
-#          > or null,
+#     "scope": <"create"|"create@project"|"view"|"list"|"update:desc"|
+#         "update:owner"|"update:assignee"|"update:project"|"update:associated_storage"|
+#         "delete"|"view:annotations"|"update:annotations"|"delete:annotations"|
+#         "export:dataset"|"view:data"|"upload:data"|"export:annotations"> or null,
 #     "auth": {
 #         "user": {
 #             "id": <num>,
@@ -101,16 +76,16 @@ is_task_staff if {
 }
 
 default allow := false
-
-allow if {
-    utils.is_admin
-}
-
-allow if {
-    input.scope in {utils.CREATE, utils.IMPORT_BACKUP}
-    utils.is_sandbox
-    utils.has_perm(utils.USER)
-}
+                                        #Comment Admin privilege
+#allow if {
+#    utils.is_admin
+#}
+                                        #Comment SANDBOX privilege
+#allow if {
+#    input.scope in {utils.CREATE, utils.IMPORT_BACKUP}
+#    utils.is_sandbox
+#    utils.has_perm(utils.USER)
+#}
 
 allow if {
     input.scope in {utils.CREATE, utils.IMPORT_BACKUP}
@@ -118,21 +93,29 @@ allow if {
     utils.has_perm(utils.USER)
     organizations.has_perm(organizations.SUPERVISOR)
 }
-
+                                        #Added BUSINESS/MAINTAINER scope to create
 allow if {
-    input.scope == utils.CREATE_IN_PROJECT
-    utils.is_sandbox
-    utils.has_perm(utils.USER)
-    is_project_staff
+    input.scope in { utils.CREATE, utils.IMPORT_BACKUP }
+    input.auth.organization.id == input.resource.organization.id
+    utils.has_perm(utils.BUSINESS)
+    organizations.has_perm(organizations.MAINTAINER)
 }
 
+                                        #Comment SANDBOX privilege
+#allow if {
+#    input.scope == utils.CREATE_IN_PROJECT
+#    utils.is_sandbox
+#    utils.has_perm(utils.USER)
+#    is_project_staff
+#}
+                                        #Verify scope of CREATE_IN_PROJECT
 allow if {
     input.scope == utils.CREATE_IN_PROJECT
     input.auth.organization.id == input.resource.organization.id
     utils.has_perm(utils.USER)
     organizations.has_perm(organizations.SUPERVISOR)
 }
-
+                                        #Comment- Deny worker privilege
 allow if {
     input.scope == utils.CREATE_IN_PROJECT
     input.auth.organization.id == input.resource.organization.id
@@ -140,30 +123,35 @@ allow if {
     organizations.has_perm(organizations.WORKER)
     is_project_staff
 }
-
-allow if {
-    input.scope == utils.LIST
-    utils.is_sandbox
-}
+                                    #Comment- Sandbox privilege
+#allow if {
+#    input.scope == utils.LIST
+#    utils.is_sandbox
+#    input.auth.organization.user.role != organizations.OWNER
+#  }
+                                    #Added owner cant list task
 
 allow if {
     input.scope == utils.LIST
     organizations.is_member
+    input.auth.organization.user.role != organizations.OWNER
 }
 
 filter := [] if { # Django Q object to filter list of entries
     utils.is_admin
-    utils.is_sandbox
+    #utils.is_sandbox              #Commented- Sandbox
 } else := qobject if {
     utils.is_admin
     utils.is_organization
     qobject := [ {"organization": input.auth.organization.id},
         {"project__organization": input.auth.organization.id}, "|"]
-} else := qobject if {
-    utils.is_sandbox
-    user := input.auth.user
-    qobject := [ {"owner_id": user.id}, {"assignee_id": user.id}, "|",
-        {"project__owner_id": user.id}, "|", {"project__assignee_id": user.id}, "|"]
+
+                                   #Comment - else block sandbox privileges.
+#} else := qobject if {
+#    utils.is_sandbox
+#    user := input.auth.user
+#    qobject := [ {"owner_id": user.id}, {"assignee_id": user.id}, "|",
+#        {"project__owner_id": user.id}, "|", {"project__assignee_id": user.id}, "|"]
 } else := qobject if {
     utils.is_organization
     utils.has_perm(utils.USER)
@@ -178,6 +166,16 @@ filter := [] if { # Django Q object to filter list of entries
         {"organization": input.auth.organization.id},
         {"project__organization": input.auth.organization.id}, "|", "&"]
 }
+                                    #Comment- allow block sandbox
+#allow if {
+#    input.scope in {
+#        utils.VIEW, utils.VIEW_ANNOTATIONS, utils.EXPORT_DATASET, utils.VIEW_METADATA,
+#        utils.VIEW_DATA, utils.EXPORT_ANNOTATIONS, utils.EXPORT_BACKUP,
+#        utils.VIEW_VALIDATION_LAYOUT
+#    }
+#    utils.is_sandbox
+#    is_task_staff
+#}
 
 allow if {
     input.scope in {
@@ -185,8 +183,11 @@ allow if {
         utils.VIEW_DATA, utils.EXPORT_ANNOTATIONS, utils.EXPORT_BACKUP,
         utils.VIEW_VALIDATION_LAYOUT
     }
-    utils.is_sandbox
-    is_task_staff
+    input.auth.organization.id == input.resource.organization.id
+    input.auth.user.privilege == utils.BUSINESS                      #Added
+    input.auth.organization.user.role == organizations.MAINTAINER    #Added
+    #utils.has_perm(utils.BUSINESS)                                   #Commented- Changed USER->BUSINESS
+    #organizations.has_perm(organizations.MAINTAINER)
 }
 
 allow if {
@@ -196,45 +197,36 @@ allow if {
         utils.VIEW_VALIDATION_LAYOUT
     }
     input.auth.organization.id == input.resource.organization.id
-    utils.has_perm(utils.USER)
+    input.auth.user.privilege == utils.USER                           #Added
+    input.auth.organization.user.role == organizations.SUPERVISOR     #Added
+    organizations.has_perm(organizations.SUPERVISOR)                  #Changed- WORKER->SUPERVISOR
+    is_task_staff
+}
+                                      #Comment- Deny WORKER privileges
+#allow if {
+#    input.scope in {
+#        utils.UPDATE_DESC, utils.UPDATE_ANNOTATIONS, utils.DELETE_ANNOTATIONS,
+#        utils.UPLOAD_DATA, utils.UPDATE_METADATA, utils.IMPORT_ANNOTATIONS,
+#        utils.UPDATE_VALIDATION_LAYOUT
+#    }
+#    utils.is_sandbox
+#    is_task_staff
+#    utils.has_perm(utils.WORKER)
+#}
+
+allow if {
+    input.scope in {
+        utils.UPDATE_DESC, utils.UPDATE_ANNOTATIONS, utils.DELETE_ANNOTATIONS,
+        utils.UPLOAD_DATA, utils.UPDATE_METADATA, utils.IMPORT_ANNOTATIONS,
+        utils.UPDATE_VALIDATION_LAYOUT
+    }
+    input.auth.organization.id == input.resource.organization.id
+    utils.has_perm(utils.BUSINESS)                      #Changed- USER->BUSINESS
     organizations.has_perm(organizations.MAINTAINER)
 }
 
 allow if {
     input.scope in {
-        utils.VIEW, utils.VIEW_ANNOTATIONS, utils.EXPORT_DATASET, utils.VIEW_METADATA,
-        utils.VIEW_DATA, utils.EXPORT_ANNOTATIONS, utils.EXPORT_BACKUP,
-        utils.VIEW_VALIDATION_LAYOUT
-    }
-    input.auth.organization.id == input.resource.organization.id
-    organizations.has_perm(organizations.WORKER)
-    is_task_staff
-}
-
-allow if {
-    input.scope in {
-        utils.UPDATE_DESC, utils.UPDATE_ANNOTATIONS, utils.DELETE_ANNOTATIONS,
-        utils.UPLOAD_DATA, utils.UPDATE_METADATA, utils.IMPORT_ANNOTATIONS,
-        utils.UPDATE_VALIDATION_LAYOUT
-    }
-    utils.is_sandbox
-    is_task_staff
-    utils.has_perm(utils.WORKER)
-}
-
-allow if {
-    input.scope in {
-        utils.UPDATE_DESC, utils.UPDATE_ANNOTATIONS, utils.DELETE_ANNOTATIONS,
-        utils.UPLOAD_DATA, utils.UPDATE_METADATA, utils.IMPORT_ANNOTATIONS,
-        utils.UPDATE_VALIDATION_LAYOUT
-    }
-    input.auth.organization.id == input.resource.organization.id
-    utils.has_perm(utils.USER)
-    organizations.has_perm(organizations.MAINTAINER)
-}
-
-allow if {
-    input.scope in {
         utils.UPDATE_DESC, utils.UPDATE_ANNOTATIONS, utils.DELETE_ANNOTATIONS,
         utils.UPLOAD_DATA, utils.UPDATE_METADATA, utils.IMPORT_ANNOTATIONS,
         utils.UPDATE_VALIDATION_LAYOUT
@@ -244,7 +236,7 @@ allow if {
     utils.has_perm(utils.WORKER)
     organizations.has_perm(organizations.WORKER)
 }
-
+                                        #Comment- Deny WORKER/sandbox privileges
 allow if {
     input.scope in {
         utils.UPDATE_OWNER, utils.UPDATE_ASSIGNEE, utils.UPDATE_PROJECT,
@@ -254,13 +246,13 @@ allow if {
     is_project_staff
     utils.has_perm(utils.WORKER)
 }
-
-allow if {
-    input.scope == utils.UPDATE_ASSOCIATED_STORAGE
-    utils.is_sandbox
-    is_project_owner
-    utils.has_perm(utils.WORKER)
-}
+                                        #Comment- Deny WORKER privilege
+#allow if {
+#    input.scope == utils.UPDATE_ASSOCIATED_STORAGE
+#    utils.is_sandbox
+#    is_project_owner
+#    utils.has_perm(utils.WORKER)
+#}
 
 allow if {
     input.scope in {
@@ -278,7 +270,7 @@ allow if {
         utils.DELETE, utils.UPDATE_ORG, utils.UPDATE_ASSOCIATED_STORAGE
     }
     input.auth.organization.id == input.resource.organization.id
-    utils.has_perm(utils.USER)
+    utils.has_perm(utils.BUSINESS)                #Changed- USER->MAINTAINER
     organizations.has_perm(organizations.MAINTAINER)
 }
 
@@ -289,9 +281,10 @@ allow if {
     }
     input.auth.organization.id == input.resource.organization.id
     utils.has_perm(utils.WORKER)
-    organizations.has_perm(organizations.WORKER)
+    organizations.has_perm(organizations.SUPERVISOR)         #Changed WORKER->SUPERVISOR
     is_task_owner
 }
+                                            #Comment- Verify and proceed
 allow if {
     input.scope == utils.UPDATE_ASSOCIATED_STORAGE
     input.auth.organization.id == input.resource.organization.id
@@ -299,18 +292,18 @@ allow if {
     organizations.has_perm(organizations.WORKER)
     is_project_owner
 }
-
-allow if {
-    input.scope in {
-        utils.UPDATE_OWNER, utils.UPDATE_ASSIGNEE, utils.UPDATE_PROJECT,
-        utils.DELETE, utils.UPDATE_ORG
-    }
-    input.auth.organization.id == input.resource.organization.id
-    utils.has_perm(utils.WORKER)
-    organizations.has_perm(organizations.WORKER)
-    is_project_staff
-}
-
+                                    #Comment- Deny WORKER privileges
+#allow if {
+#    input.scope in {
+#        utils.UPDATE_OWNER, utils.UPDATE_ASSIGNEE, utils.UPDATE_PROJECT,
+#        utils.DELETE, utils.UPDATE_ORG
+#    }
+#    input.auth.organization.id == input.resource.organization.id
+#    utils.has_perm(utils.WORKER)
+#    organizations.has_perm(organizations.WORKER)
+#    is_project_staff
+#}
+                                    #Verify
 allow if {
     input.scope == utils.DOWNLOAD_EXPORTED_FILE
     input.auth.user.id == input.resource.rq_job.owner.id

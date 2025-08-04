@@ -6,24 +6,9 @@ import data.utils
 import data.organizations
 
 # input: {
-#     "scope": <
-#              "create"|
-#              "delete"|
-#              "download:exported_file"|
-#              "export:annotations"|
-#              "export:backup"|
-#              "export:dataset"|
-#              "import:backup"|
-#              "import:dataset"|
-#              "list"|
-#              "update:assignee"|
-#              "update:associated_storage"|
-#              "update:desc"|
-#              "update:organization"|
-#              "update:owner"|
-#              "update"|
-#              "view"|
-#          > or null,
+#     "scope": <"create"|"list"|"update:desc"|"update:owner"|"update:assignee"|
+#               "update:associated_storage"|"view"|"delete"|"export:dataset"|"export:annotations"|
+#               "import:dataset"> or null,
 #     "auth": {
 #         "user": {
 #             "id": <num>,
@@ -58,11 +43,12 @@ is_project_staff if {
     utils.is_resource_assignee
 }
 
+                                                                 #Comment lines to disable Admin
 #allow if {
 #    utils.is_admin
 #}
 
-
+                                                                 #Comment: USER cannot create a project/backup
 #allow if {
 #    input.scope in {utils.CREATE, utils.IMPORT_BACKUP}
 #    utils.is_sandbox
@@ -74,16 +60,18 @@ allow if {
     input.auth.organization.id == input.resource.organization.id
     utils.has_perm(utils.USER)
     organizations.has_perm(organizations.SUPERVISOR)
-    not utils.is_admin
+    not utils.is_admin                                          # Added to deny Admin
 }
-
-allow if{
-    input.scope in { utils.CREATE, utils.IMPORT_BACKUP }
+                                                                # Added so BUSINESS user with MAINTAINER role can create project/backup
+allow if {
+    input.scope in { utils.CREATE, utils.IMPORT_BACKUP }[input.scope]
     input.auth.organization.id == input.resource.organization.id
     utils.has_perm(utils.BUSINESS)
     organizations.has_perm(organizations.MAINTAINER)
     not utils.is_admin
 }
+
+                                                                #Comment to disable sandbox
 
 #allow if {
 #    input.scope == utils.LIST
@@ -93,13 +81,14 @@ allow if{
 allow if {
     input.scope == utils.LIST
     organizations.is_member
+    input.auth.organization.user.role != organizations.OWNER     #Added - Deny admin to see list of projects etc.
 }
 
 filter := [] if { # Django Q object to filter list of entries
-    utils.is_admin
+#    utils.is_admin                     #Comment- verify
     utils.is_sandbox
 } else := qobject if {
-    utils.is_admin
+#    utils.is_admin                     #Comment- verify
     utils.is_organization
     qobject := [ {"organization": input.auth.organization.id} ]
 } else := qobject if {
@@ -117,7 +106,7 @@ filter := [] if { # Django Q object to filter list of entries
     qobject := [ {"owner_id": user.id}, {"assignee_id": user.id}, "|",
         {"organization": input.auth.organization.id}, "&" ]
 }
-
+                                                            #Comment- Deny view + sandbox
 #allow if {
 #    input.scope == utils.VIEW
 #    utils.is_sandbox
@@ -127,18 +116,26 @@ filter := [] if { # Django Q object to filter list of entries
 allow if {
     input.scope == utils.VIEW
     input.auth.organization.id == input.resource.organization.id
-    utils.has_perm(utils.USER)
+    utils.has_perm(utils.BUSINESS)                         #Modified- Give BUSINESS group view access
     organizations.has_perm(organizations.MAINTAINER)
 }
-
+                                                            #Added- Give SUPERVISOR group view access
 allow if {
     input.scope == utils.VIEW
     input.auth.organization.id == input.resource.organization.id
-    organizations.has_perm(organizations.WORKER)
-    is_project_staff
+    utils.has_perm(utils.USER)
+    organizations.has_perm(organizations.SUPERVISOR)
 }
+                                                            ###utils.UPDATE_ASSOCIATED_STORAGE -->New utility 2.40##
+                                                            #Comment- Deny WORKER view access
+#allow if {
+#    input.scope == utils.VIEW
+#    input.auth.organization.id == input.resource.organization.id
+#    organizations.has_perm(organizations.WORKER)
+#    is_project_staff
+#}
 
-
+                                                            #Comment- Deny WORKER in scope below
 #allow if {
 #    input.scope in {utils.DELETE, utils.UPDATE_ORG, utils.UPDATE_ASSOCIATED_STORAGE}
 #    utils.is_sandbox
@@ -149,23 +146,32 @@ allow if {
 allow if {
     input.scope in {utils.DELETE, utils.UPDATE_ORG, utils.UPDATE_ASSOCIATED_STORAGE}
     input.auth.organization.id == input.resource.organization.id
-    utils.has_perm(utils.WORKER)
-    organizations.is_member
+    utils.has_perm(utils.USER)                             #Modifed- Worker -> USER group
+    organizations.has_perm(organizations.SUPERVISOR)       #Modified is_member -> SUPERVISOR
     utils.is_resource_owner
 }
 
+                                                           #Added- BUSINESS group with scope
 allow if {
-    input.scope in {utils.DELETE, utils.UPDATE_ORG, utils.UPDATE_ASSOCIATED_STORAGE}
+    input.scope in { utils.DELETE, utils.UPDATE_ORG }[input.scope]
     input.auth.organization.id == input.resource.organization.id
-    utils.has_perm(utils.USER)
-    organizations.is_staff
+    utils.has_perm(utils.BUSINESS)
+    organizations.is_member
+    utils.is_resource_owner
 }
-
+                                                           #Comment- Deny user scope
+#allow if {
+#    input.scope in {utils.DELETE, utils.UPDATE_ORG, utils.UPDATE_ASSOCIATED_STORAGE}
+#    input.auth.organization.id == input.resource.organization.id
+#    utils.has_perm(utils.USER)
+#    organizations.is_staff
+#}
+                                                            #Comment- Deny scope for user
 #allow if {
 #    input.scope in {utils.UPDATE_DESC, utils.IMPORT_DATASET}
 #    utils.is_sandbox
 #    is_project_staff
-#    utils.has_perm(utils.WORKER)
+#    utils.has_perm(utils.USER)                            #Modify- WORKER -> USER
 #}
 
 allow if {
@@ -182,7 +188,7 @@ allow if {
     utils.has_perm(utils.WORKER)
     organizations.is_member
 }
-
+                                                    #Comment- sandbox',deny worker scope
 #allow if {
 #    input.scope == utils.UPDATE_ASSIGNEE
 #    utils.is_sandbox
@@ -194,7 +200,7 @@ allow if {
     input.scope == utils.UPDATE_ASSIGNEE
     input.auth.organization.id == input.resource.organization.id
     utils.is_resource_owner
-    utils.has_perm(utils.WORKER)
+    utils.has_perm(utils.USER)                  #Modified - WORKER -> USER?
     organizations.is_member
 }
 
@@ -209,7 +215,7 @@ allow if {
     input.scope == utils.UPDATE_OWNER
     input.auth.organization.id == input.resource.organization.id
     utils.is_resource_owner
-    utils.has_perm(utils.WORKER)
+    utils.has_perm(utils.USER)                 #Modify- WORKER-> USER?
     organizations.is_staff
 }
 
@@ -219,7 +225,7 @@ allow if {
     utils.has_perm(utils.USER)
     organizations.is_staff
 }
-
+                                                #Comment - Deny sandbom privilege
 #allow if {
 #    input.scope in {utils.EXPORT_ANNOTATIONS, utils.EXPORT_DATASET, utils.EXPORT_BACKUP}
 #    utils.is_sandbox
@@ -239,7 +245,7 @@ allow if {
     utils.has_perm(utils.USER)
     organizations.has_perm(organizations.MAINTAINER)
 }
-
+                                                #Comment - Please check scope?
 allow if {
     input.scope == utils.DOWNLOAD_EXPORTED_FILE
     input.auth.user.id == input.resource.rq_job.owner.id

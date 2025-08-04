@@ -63,10 +63,15 @@ default allow := false
 allow if {
     utils.is_admin
 }
-
+                                    #Comment- Deny user
+#allow if {
+#    input.scope == utils.CREATE
+#    utils.has_perm(utils.USER)
+#}
+                                    #Added- BUSINESS owner can create
 allow if {
     input.scope == utils.CREATE
-    utils.has_perm(utils.USER)
+    utils.has_perm(utils.BUSINESS)
 }
 
 filter := [] if { # Django Q object to filter list of entries
