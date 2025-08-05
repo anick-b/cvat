@@ -32,14 +32,15 @@ import data.organizations
 
 default allow := false
 
-#allow if {
-#    utils.is_admin
-#}
-
 allow if {
-    input.scope == utils.LIST
-    utils.is_sandbox
+    utils.is_admin
 }
+
+#Commented sandbox
+#allow if {
+#    input.scope == utils.LIST
+#    utils.is_sandbox
+#}
 
 allow if {
     input.scope == utils.LIST

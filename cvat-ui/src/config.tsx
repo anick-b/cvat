@@ -137,7 +137,7 @@ const LOCAL_STORAGE_LAST_FRAME_MEMORY_LIMIT = 20;
 const REQUEST_SUCCESS_NOTIFICATION_DURATION = 5; // seconds
 
 // Session timeout configuration
-const SESSION_WARNING_TIMEOUT = 0.5 * 60 * 1000; // 0.5 minutes in milliseconds
+const SESSION_WARNING_TIMEOUT = 10 * 60 * 1000; // 10 minutes in milliseconds
 const SESSION_LOGOUT_TIMEOUT = 1 * 60 * 1000; // 1 minutes after warning in milliseconds
 const SESSION_COUNTDOWN_INTERVAL = 1000; // 1 second
 

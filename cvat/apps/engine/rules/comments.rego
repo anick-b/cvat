@@ -125,23 +125,23 @@ is_comment_staff if {
 }
 
 default allow := false
-
-allow if {
-    utils.is_admin
-}
-
-allow if {
-    input.scope == utils.CREATE_IN_ISSUE
-    utils.is_sandbox
-    utils.has_perm(utils.WORKER)
-    is_issue_staff
-}
+                                  #Comment Admin privilege
+#allow if {
+#    utils.is_admin
+#}
+                                 #Comment USER/sandbox private
+#allow if {
+#    input.scope == utils.CREATE_IN_ISSUE
+#    utils.is_sandbox
+#    utils.has_perm(utils.WORKER)     #Change WORKER->USER(inb)
+#    is_issue_staff
+#}
 
 allow if {
     input.scope == utils.CREATE_IN_ISSUE
     input.auth.organization.id == input.resource.organization.id
     utils.is_organization
-    utils.has_perm(utils.USER)
+    utils.has_perm(utils.BUSINESS)     #Modifed USER->BUSINESS
     organizations.has_perm(organizations.MAINTAINER)
 }
 
@@ -149,15 +149,15 @@ allow if {
     input.scope == utils.CREATE_IN_ISSUE
     input.auth.organization.id == input.resource.organization.id
     utils.is_organization
-    utils.has_perm(utils.WORKER)
+    utils.has_perm(utils.WORKER)       #Modify WORKER->USER(inb)
     organizations.is_member
     is_issue_staff
 }
-
-allow if {
-    input.scope == utils.LIST
-    utils.is_sandbox
-}
+                                       #Comment- Deny sandbox
+#allow if {
+#    input.scope == utils.LIST
+#    utils.is_sandbox
+#}
 
 allow if {
     input.scope == utils.LIST
@@ -214,17 +214,17 @@ filter := [] if { # Django Q object to filter list of entries
         {"issue__job__segment__task__project__organization": org.id}, "|", "&"
     ]
 }
-
-allow if {
-    input.scope == utils.VIEW
-    utils.is_sandbox
-    is_comment_staff
-}
+                                    #Comment- Deny sandbox
+#allow if {
+#    input.scope == utils.VIEW
+#    utils.is_sandbox
+#    is_comment_staff
+#}
 
 allow if {
     input.scope == utils.VIEW
     input.auth.organization.id == input.resource.organization.id
-    utils.has_perm(utils.USER)
+    utils.has_perm(utils.BUSINESS)     # Modifed- USER->BUSINESS
     organizations.has_perm(organizations.MAINTAINER)
 }
 
@@ -234,18 +234,18 @@ allow if {
     organizations.is_member
     is_comment_staff
 }
-
-allow if {
-    input.scope in {utils.UPDATE, utils.DELETE}
-    utils.is_sandbox
-    utils.has_perm(utils.WORKER)
-    is_comment_staff
-}
+                                    #Comment- USER/WORKER/sandbox scope
+#allow if {
+#    input.scope in {utils.UPDATE, utils.DELETE}
+#    utils.is_sandbox
+#    utils.has_perm(utils.WORKER)
+#    is_comment_staff
+#}
 
 allow if {
     input.scope in {utils.UPDATE, utils.DELETE}
     input.auth.organization.id == input.resource.organization.id
-    utils.has_perm(utils.USER)
+    utils.has_perm(utils.BUSINESS)    #Modifed USER->BUSINESS
     organizations.has_perm(organizations.MAINTAINER)
 }
 
@@ -253,6 +253,6 @@ allow if {
     input.scope in {utils.UPDATE, utils.DELETE}
     input.auth.organization.id == input.resource.organization.id
     is_comment_staff
-    utils.has_perm(utils.WORKER)
+    utils.has_perm(utils.USER)     #Modify WORKER->USER?
     organizations.is_member
 }

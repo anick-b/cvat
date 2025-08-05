@@ -47,10 +47,10 @@ allow if {
     utils.is_admin
 }
 
-allow if {
-    input.scope == utils.LIST
-    utils.is_sandbox
-}
+#allow if {
+#    input.scope == utils.LIST
+#    utils.is_sandbox
+#}
 
 allow if {
     input.scope == utils.LIST

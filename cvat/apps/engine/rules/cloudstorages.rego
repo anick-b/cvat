@@ -31,28 +31,28 @@ import data.organizations
 
 default allow := false
 
-# Admin has no restrictions
+# Admin has no restrictions ----- Keep/Discard?
 allow if {
     utils.is_admin
 }
-
-allow if {
-    input.scope == utils.CREATE
-    utils.has_perm(utils.USER)
-    utils.is_sandbox
-}
+                            #Comment- sandbox privilege
+#allow if {
+#    input.scope == utils.CREATE
+#    utils.has_perm(utils.USER)
+#    utils.is_sandbox
+#}
 
 allow if {
     input.scope == utils.CREATE
     input.auth.organization.id == input.resource.organization.id
-    utils.has_perm(utils.USER)
+    utils.has_perm(utils.BUSINESS)          #Modified- USER->BUSINESS (MAINTAINER)
     organizations.has_perm(organizations.MAINTAINER)
 }
-
-allow if {
-    input.scope == utils.LIST
-    utils.is_sandbox
-}
+                            #Comment- sandbox privilege
+#allow if {
+#    input.scope == utils.LIST
+#    utils.is_sandbox
+#}
 
 allow if {
     input.scope == utils.LIST
@@ -76,12 +76,12 @@ filter := [] if { # Django Q object to filter list of entries
     utils.is_organization
     qobject := [ {"owner": input.auth.user.id}, {"organization": input.auth.organization.id}, "&" ]
 }
-
-allow if {
-    input.scope in {utils.VIEW, utils.LIST_CONTENT}
-    utils.is_sandbox
-    utils.is_resource_owner
-}
+                                #Comment- sandbox privilege
+#allow if {
+#    input.scope in {utils.VIEW, utils.LIST_CONTENT}
+#    utils.is_sandbox
+#    utils.is_resource_owner
+#}
 
 allow if {
     input.scope in {utils.VIEW, utils.LIST_CONTENT}
@@ -96,26 +96,26 @@ allow if {
     utils.has_perm(utils.USER)
     organizations.has_perm(organizations.SUPERVISOR)
 }
+                                    #Comment- Deny USER Scope
+#allow if {
+#    input.scope in {utils.UPDATE, utils.DELETE}
+#    utils.is_sandbox
+#    utils.has_perm(utils.WORKER)     #change- WORKER->USER(inb)
+#    utils.is_resource_owner
+#}
+                                    #Comment- Deny USER Scope
+#allow if {
+#    input.scope in {utils.UPDATE, utils.DELETE}
+#    input.auth.organization.id == input.resource.organization.id
+#    organizations.is_member
+#    utils.has_perm(utils.WORKER)    #change- WORKER->USER(inb)
+#    utils.is_resource_owner
+#}
 
-allow if {
-    input.scope in {utils.UPDATE, utils.DELETE}
-    utils.is_sandbox
-    utils.has_perm(utils.WORKER)
-    utils.is_resource_owner
-}
 
 allow if {
     input.scope in {utils.UPDATE, utils.DELETE}
     input.auth.organization.id == input.resource.organization.id
-    organizations.is_member
-    utils.has_perm(utils.WORKER)
-    utils.is_resource_owner
-}
-
-
-allow if {
-    input.scope in {utils.UPDATE, utils.DELETE}
-    input.auth.organization.id == input.resource.organization.id
-    utils.has_perm(utils.USER)
+    utils.has_perm(utils.BUSINESS)  #Modifed USER -> BUSINESS(MAINTAINER)
     organizations.has_perm(organizations.MAINTAINER)
 }

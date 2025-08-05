@@ -55,31 +55,31 @@ allow if {
     utils.is_admin
 }
 
-allow if {
-    input.scope == utils.VIEW
-    utils.is_sandbox
-    utils.has_perm(utils.WORKER)
-    input.resource.target.is_job_staff
-}
+#allow if {
+#    input.scope == utils.VIEW
+#    utils.is_sandbox
+#    utils.has_perm(utils.WORKER)
+#    input.resource.target.is_job_staff
+#}
 
-allow if {
-    input.scope == utils.VIEW
-    utils.is_sandbox
-    utils.has_perm(utils.WORKER)
-    is_target_staff
-}
+#allow if {
+#    input.scope == utils.VIEW
+#    utils.is_sandbox
+#    utils.has_perm(utils.WORKER)
+#    is_target_staff
+#}
 
-allow if {
-    input.scope in {utils.CREATE, utils.DELETE, utils.UPDATE}
-    utils.is_sandbox
-    utils.has_perm(utils.USER)
-    is_target_staff
-}
+#allow if {
+#    input.scope in {utils.CREATE, utils.DELETE, utils.UPDATE}
+#    utils.is_sandbox
+#    utils.has_perm(utils.USER)
+#    is_target_staff
+#}
 
 allow if {
     input.scope in {utils.CREATE, utils.DELETE, utils.UPDATE, utils.VIEW}
     input.auth.organization.id == input.resource.organization.id
-    utils.has_perm(utils.USER)
+    utils.has_perm(utils.BUSINESS)                                            #Changed USER--->BUSINESS
     organizations.has_perm(organizations.MAINTAINER)
 }
 

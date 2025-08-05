@@ -122,19 +122,19 @@ default allow := false
 allow if {
     utils.is_admin
 }
-
-allow if {
-    input.scope == utils.CREATE_IN_JOB
-    utils.is_sandbox
-    utils.has_perm(utils.WORKER)
-    is_job_staff
-}
+                                    #Comment- Deny sandbox privilege
+#allow if {
+#    input.scope == utils.CREATE_IN_JOB
+#    utils.is_sandbox
+#    utils.has_perm(utils.WORKER)    #WORKER/USER(inb)
+#    is_job_staff
+#}
 
 allow if {
     input.scope == utils.CREATE_IN_JOB
     input.auth.organization.id == input.resource.organization.id
     utils.is_organization
-    utils.has_perm(utils.USER)
+    utils.has_perm(utils.BUSINESS)   #Modifed- USER->BUSINESS
     organizations.has_perm(organizations.MAINTAINER)
 }
 
@@ -146,11 +146,11 @@ allow if {
     organizations.is_member
     is_job_staff
 }
-
-allow if {
-    input.scope == utils.LIST
-    utils.is_sandbox
-}
+                                    #Comment- Deny sandbox privilege
+#allow if {
+#    input.scope == utils.LIST
+#    utils.is_sandbox
+#}
 
 allow if {
     input.scope == utils.LIST
@@ -203,17 +203,17 @@ filter := [] if { # Django Q object to filter list of entries
         {"job__segment__task__project__organization": org.id}, "|", "&"
     ]
 }
-
-allow if {
-    input.scope == utils.VIEW
-    utils.is_sandbox
-    is_issue_staff
-}
+                            #Comment- Disable sandbox privilege
+#allow if {
+#    input.scope == utils.VIEW
+#    utils.is_sandbox
+#    is_issue_staff
+#}
 
 allow if {
     input.scope == utils.VIEW
     input.auth.organization.id == input.resource.organization.id
-    utils.has_perm(utils.USER)
+    utils.has_perm(utils.BUSINESS)    #Modified USER->BUSINESS
     organizations.has_perm(organizations.MAINTAINER)
 }
 
@@ -223,40 +223,40 @@ allow if {
     organizations.is_member
     is_issue_staff
 }
-
-allow if {
-    input.scope == utils.UPDATE
-    utils.is_sandbox
-    utils.has_perm(utils.WORKER)
-    is_issue_staff
-}
-
-allow if {
-    input.scope == utils.UPDATE
-    input.auth.organization.id == input.resource.organization.id
-    utils.has_perm(utils.WORKER)
-    organizations.is_member
-    is_issue_staff
-}
-
-allow if {
-    input.scope == utils.DELETE
-    utils.is_sandbox
-    utils.has_perm(utils.WORKER)
-    is_issue_admin
-}
-
-allow if {
-    input.scope == utils.DELETE
-    input.auth.organization.id == input.resource.organization.id
-    utils.has_perm(utils.WORKER)
-    organizations.is_member
-    is_issue_admin
-}
+                            #Comment- Disable sandbox privilege
+#allow if {
+#    input.scope == utils.UPDATE
+#    utils.is_sandbox
+#    utils.has_perm(utils.WORKER)
+#    is_issue_staff
+#}
+                                           #Verify????
+#allow if {
+#    input.scope == utils.UPDATE
+#    input.auth.organization.id == input.resource.organization.id
+#    utils.has_perm(utils.WORKER)
+#    organizations.is_member
+#    is_issue_staff
+#}
+                                            #Verify
+#allow if {
+#    input.scope == utils.DELETE
+#    utils.is_sandbox
+#    utils.has_perm(utils.WORKER)
+#    is_issue_admin
+#}
+                                            #Verify???
+#allow if {
+#    input.scope == utils.DELETE
+#    input.auth.organization.id == input.resource.organization.id
+#    utils.has_perm(utils.WORKER)
+#    organizations.is_member
+#    is_issue_admin
+#}
 
 allow if {
     input.scope in {utils.UPDATE, utils.DELETE}
     input.auth.organization.id == input.resource.organization.id
-    utils.has_perm(utils.USER)
+    utils.has_perm(utils.BUSINESS)       #Modified USER->BUSINESS
     organizations.has_perm(organizations.MAINTAINER)
 }

@@ -215,16 +215,16 @@ allow if {
     organizations.has_perm(organizations.MAINTAINER)
 }
                                             #Verify Comment - Blogic
-#allow if {
-#    input.scope in {
-#        utils.UPDATE_STATE, utils.UPDATE_ANNOTATIONS, utils.DELETE_ANNOTATIONS,
-#        utils.IMPORT_ANNOTATIONS, utils.UPDATE_METADATA
-#    }
-#    input.auth.organization.id == input.resource.organization.id
-#    utils.has_perm(utils.WORKER)
-#    organizations.has_perm(organizations.WORKER)
-#    is_job_staff
-#}
+allow if {
+    input.scope in {
+        utils.UPDATE_STATE, utils.UPDATE_ANNOTATIONS, utils.DELETE_ANNOTATIONS,
+        utils.IMPORT_ANNOTATIONS, utils.UPDATE_METADATA
+    }
+    input.auth.organization.id == input.resource.organization.id
+    utils.has_perm(utils.USER)
+    organizations.has_perm(organizations.WORKER)
+    is_job_staff
+}
                                 #Added scope to SUPERVISOR role
 allow if {
     input.scope in {
