@@ -507,20 +507,30 @@ LOGGING = {
             "formatter": "standard",
         },
         "server_file": {
-            "class": "logging.handlers.RotatingFileHandler",
+            #"class": "logging.handlers.RotatingFileHandler",                              #Original
+            "class": "logging.handlers.TimedRotatingFileHandler",                          #Modified
             "level": "DEBUG",
-            "filename": os.path.join(BASE_DIR, "logs", "cvat_server.log"),
+            #"filename": os.path.join(BASE_DIR, "logs", "cvat_server.log"),               #Original
+            "filename": os.path.join(BASE_DIR, "logs", "eaip_server.log"),                #Modified
             "formatter": "standard",
-            "maxBytes": 1024 * 1024 * 50,  # 50 MB
-            "backupCount": 5,
+            #"maxBytes": 1024 * 1024 * 50,  # 50 MB
+            #"backupCount": 5,
+            "when": "midnight",                                                            #Added
+            "interval": 1,                                                                 #Added
+            "backupCount": 90,                                                             #Added
         },
         "dataset_handler": {
-            "class": "logging.handlers.RotatingFileHandler",
+            #"class": "logging.handlers.RotatingFileHandler",                              #Original
+            "class": "logging.handlers.TimedRotatingFileHandler",                          #Modified
             "level": "DEBUG",
-            "filename": os.path.join(BASE_DIR, "logs", "cvat_server_dataset.log"),
+            #"filename": os.path.join(BASE_DIR, "logs", "cvat_server_dataset.log"),        #Original
+            "filename": os.path.join(BASE_DIR, "logs", "eaip_server_dataset.log"),         #Modified
             "formatter": "standard",
-            "maxBytes": 1024 * 1024 * 50,  # 50 MB
-            "backupCount": 3,
+            #"maxBytes": 1024 * 1024 * 50,  # 50 MB
+            #"backupCount": 3,
+            "when": "midnight",                                                        #Added
+            "interval": 1,                                                             #Added
+            "backupCount": 90,                                                        #Added
         },
         "vector": {
             "level": "INFO",
@@ -540,7 +550,8 @@ LOGGING = {
         "handlers": ["console", "server_file"],
     },
     "loggers": {
-        "cvat": {
+        #"cvat": {                                                                        #Original
+        "eaip": {                                                                         #Modified
             "level": os.getenv("DJANGO_LOG_LEVEL", "DEBUG"),
         },
         "dataset_logger": {
