@@ -12,6 +12,7 @@ $action-button-color-1: black;
 $action-button-color-2: gray;
 $action-button-color-3: #d4d4d4;
 $placeholder-color: #c5bfbf;
+
 $base-transition: all 0.8s ease;
 $input-transition: all 0.3s ease;
 $social-google-background: #4286f5;
@@ -19,6 +20,23 @@ $social-google-background: #4286f5;
 .cvat-signing-layout {
     font-family: $signing-font;
 }
+
+
+
+// .cvat-signing-layout .ant-layout-content {
+//     display: flex;
+//     align-items: center;
+//     justify-content: center;
+//     min-height: calc(100vh - 64px); // Subtract header height
+//     padding: 20px;
+// }
+
+// .cvat-signing-layout .ant-layout-content .ant-row {
+//     width: 100%;
+//     max-width: 400px; // Set maximum width for the form
+//     justify-content: center;
+// }
+
 
 .cvat-signing-title {
     .ant-typography {

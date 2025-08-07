@@ -80,7 +80,7 @@ function LoginFormComponent(props: Props): JSX.Element {
                         </Col>
                     )
                 }
-                {
+                {/* {
                     !credential && renderRegistrationComponent && (
                         <Row>
                             <Col className='cvat-credentials-link'>
@@ -97,10 +97,10 @@ function LoginFormComponent(props: Props): JSX.Element {
                             </Col>
                         </Row>
                     )
-                }
-                {
+                } */}
+                {/* {
                     renderResetPassword && forgotPasswordLink
-                }
+                } */}
             </Row>
             <Col>
                 <Title level={2}> Sign in </Title>

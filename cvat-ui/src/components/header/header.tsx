@@ -388,12 +388,12 @@ function HeaderComponent(props: Props): JSX.Element {
         label: 'Settings',
     }, 20]);
 
-    menuItems.push([{
-        key: 'about',
-        icon: <InfoCircleOutlined />,
-        onClick: () => showAboutModal(),
-        label: 'About',
-    }, 30]);
+    // menuItems.push([{
+    //     key: 'about',
+    //     icon: <InfoCircleOutlined />,
+    //     onClick: () => showAboutModal(),
+    //     label: 'About',
+    // }, 30]);
 
     if (renderChangePasswordItem) {
         menuItems.push([{
@@ -555,9 +555,11 @@ function HeaderComponent(props: Props): JSX.Element {
                             .map((menuItem) => menuItem[0]),
                         triggerSubMenuAction: 'click',
                         className: 'cvat-header-menu',
+
                     }}
                     className='cvat-header-menu-user-dropdown'
                 >
+                    {/* {console.log('-----------------menuItems', menuItems)} */}
                     <span>
                         <UserOutlined className='cvat-header-dropdown-icon' />
                         <Row>

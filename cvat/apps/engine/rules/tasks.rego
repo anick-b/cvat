@@ -167,15 +167,28 @@ filter := [] if { # Django Q object to filter list of entries
         {"project__organization": input.auth.organization.id}, "|", "&"]
 }
                                     #Comment- allow block sandbox
+#allow if {
+#    input.scope in {
+#        utils.VIEW, utils.VIEW_ANNOTATIONS, utils.EXPORT_DATASET, utils.VIEW_METADATA,
+#        utils.VIEW_DATA, utils.EXPORT_ANNOTATIONS, utils.EXPORT_BACKUP,
+#        utils.VIEW_VALIDATION_LAYOUT
+#    }
+#    utils.is_sandbox
+#    is_task_staff
+#}
+
+
 allow if {
     input.scope in {
-        utils.VIEW, utils.VIEW_ANNOTATIONS, utils.EXPORT_DATASET, utils.VIEW_METADATA,
-        utils.VIEW_DATA, utils.EXPORT_ANNOTATIONS, utils.EXPORT_BACKUP,
+        utils.VIEW, utils.VIEW_ANNOTATIONS,
+        utils.VIEW_DATA, utils.VIEW_METADATA,
         utils.VIEW_VALIDATION_LAYOUT
     }
 #    utils.is_sandbox
     is_task_staff
 }
+
+
 
 allow if {
     input.scope in {

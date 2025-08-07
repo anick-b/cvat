@@ -85,15 +85,15 @@ export default function TaskActionsItems(menuItemsData: MenuItemsData, taskMenuP
         label: <CVATMenuEditLabel>Assignee</CVATMenuEditLabel>,
     }, 50]);
 
-    menuItems.push([{
-        key: 'view-analytics',
-        label: <Link to={`/tasks/${taskId}/analytics`}>View analytics</Link>,
-    }, 60]);
+    // menuItems.push([{
+    //     key: 'view-analytics',
+    //     label: <Link to={`/tasks/${taskId}/analytics`}>View analytics</Link>,
+    // }, 60]);
 
-    menuItems.push([{
-        key: 'quality_control',
-        label: <Link to={`/tasks/${taskId}/quality-control`}>Quality control</Link>,
-    }, 70]);
+    // menuItems.push([{
+    //     key: 'quality_control',
+    //     label: <Link to={`/tasks/${taskId}/quality-control`}>Quality control</Link>,
+    // }, 70]);
 
     if (isConsensusEnabled) {
         menuItems.push([{

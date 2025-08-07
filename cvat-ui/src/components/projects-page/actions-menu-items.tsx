@@ -58,10 +58,10 @@ export default function ProjectActionsItems(
         label: <CVATMenuEditLabel>Assignee</CVATMenuEditLabel>,
     }, 30]);
 
-    menuItems.push([{
-        key: 'view-analytics',
-        label: <Link to={`/projects/${projectId}/analytics`}>View analytics</Link>,
-    }, 40]);
+    // menuItems.push([{
+    //     key: 'view-analytics',
+    //     label: <Link to={`/projects/${projectId}/analytics`}>View analytics</Link>,
+    // }, 40]);
 
     menuItems.push([{
         key: 'quality-control',

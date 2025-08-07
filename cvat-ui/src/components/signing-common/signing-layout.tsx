@@ -49,6 +49,27 @@ export const formSizes: FormSizes = {
     },
 };
 
+// export const formSizes: FormSizes = {
+//     wrapper: {
+//         xs: { span: 24 },
+//         sm: { span: 20 },  // Reduce from 24
+//         md: { span: 16 },  // Reduce from 24
+//         lg: { span: 12 },  // Reduce from 24
+//         xl: { span: 8 },   // Reduce from 15
+//         xxl: { span: 6 },  // Reduce from 12
+//     },
+//     form: {
+//         xs: { span: 24 },
+//         sm: { span: 24 },
+//         md: { span: 24 },
+//         lg: { span: 24 },
+//         xl: { span: 24 },
+//         xxl: { span: 24 },
+//     },
+// };
+
+
+
 function SignInLayout(props: SignInLayoutComponentProps): JSX.Element {
     const { children } = props;
     const { Content, Header } = Layout;
@@ -71,7 +92,7 @@ function SignInLayout(props: SignInLayoutComponentProps): JSX.Element {
         xxl: { span: 22 },
     };
     return (
-        <Layout>
+        <Layout >
             <SVGSigningBackground className='cvat-signing-background' />
             <Header className='cvat-signing-header'>
                 <Row className='cvat-signing-header-logo-wrapper' justify='center' align='middle'>
@@ -83,9 +104,9 @@ function SignInLayout(props: SignInLayoutComponentProps): JSX.Element {
             <Layout className='cvat-signing-layout'>
                 <Content>
                     <Row justify='center' align='middle' style={{ height: '100%' }}>
-                        <Col {...titleSizes} className='cvat-signing-title'>
-                            <Title>{subtitle}</Title>
-                        </Col>
+                        {/* <Col {...titleSizes} className='cvat-signing-title'> */}
+                            {/* <Title>{subtitle}</Title> */}
+                        {/* </Col> */}
                         {children}
                     </Row>
                 </Content>

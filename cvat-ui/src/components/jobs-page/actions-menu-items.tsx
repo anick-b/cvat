@@ -103,10 +103,10 @@ export default function JobActionsItems(
         label: <CVATMenuEditLabel>Stage</CVATMenuEditLabel>,
     }, 80]);
 
-    menuItems.push([{
-        key: 'view-analytics',
-        label: <Link to={`/tasks/${taskId}/jobs/${jobId}/analytics`}>View analytics</Link>,
-    }, 90]);
+    // menuItems.push([{
+    //     key: 'view-analytics',
+    //     label: <Link to={`/tasks/${taskId}/jobs/${jobId}/analytics`}>View analytics</Link>,
+    // }, 90]);
 
     if (onDeleteJob) {
         menuItems.push([{ type: 'divider' }, 99]);
