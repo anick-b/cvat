@@ -505,7 +505,7 @@ function HeaderComponent(props: Props): JSX.Element {
                         Models
                     </Button>
                 ) : null}
-                {isAnalyticsPluginActive && user.hasAnalyticsAccess ? (
+                {/* {isAnalyticsPluginActive && user.hasAnalyticsAccess ? (
                     <Button
                         className={getButtonClassName('analytics', false)}
                         type='link'
@@ -517,7 +517,7 @@ function HeaderComponent(props: Props): JSX.Element {
                     >
                         Analytics
                     </Button>
-                ) : null}
+                ) : null} */}
             </div>
             <div className='cvat-right-header'>
                 {/* <CVATTooltip overlay='Click to open repository'>
