@@ -182,10 +182,34 @@ allow if {
     not utils.is_admin
 }
 
+
+allow if {
+    input.scope in {
+        utils.CREATE, utils.DELETE, utils.VIEW,
+        utils.EXPORT_DATASET, utils.EXPORT_ANNOTATIONS,
+        utils.VIEW_ANNOTATIONS, utils.VIEW_DATA, utils.VIEW_METADATA
+    }
+    input.auth.organization.id == input.resource.organization.id
+    utils.has_perm(utils.USER)            #Modified - USER->BUSINESS
+    organizations.has_perm(organizations.SUPERVISOR)
+    not utils.is_admin
+}
+
+#allow if {
+#    input.scope in {
+#        utils.VIEW,
+#        utils.EXPORT_DATASET, utils.EXPORT_ANNOTATIONS,
+#        utils.VIEW_ANNOTATIONS, utils.VIEW_DATA, utils.VIEW_METADATA
+#    }
+#   input.auth.organization.id == input.resource.organization.id
+#    organizations.has_perm(organizations.WORKER)
+#    is_job_staff
+#    not utils.is_admin
+#}
+
 allow if {
     input.scope in {
         utils.VIEW,
-        utils.EXPORT_DATASET, utils.EXPORT_ANNOTATIONS,
         utils.VIEW_ANNOTATIONS, utils.VIEW_DATA, utils.VIEW_METADATA
     }
    input.auth.organization.id == input.resource.organization.id
@@ -193,6 +217,7 @@ allow if {
     is_job_staff
     not utils.is_admin
 }
+
 
                                         #Comment - Deny USER
 #allow if {
@@ -229,7 +254,8 @@ allow if {
 allow if {
     input.scope in {
         utils.UPDATE_STATE, utils.UPDATE_ANNOTATIONS, utils.DELETE_ANNOTATIONS,
-        utils.IMPORT_ANNOTATIONS, utils.UPDATE_METADATA
+        utils.IMPORT_ANNOTATIONS, utils.UPDATE_METADATA,
+        utils.EXPORT_DATASET, utils.EXPORT_ANNOTATIONS
     }
     input.auth.organization.id == input.resource.organization.id
     utils.has_perm(utils.USER)
