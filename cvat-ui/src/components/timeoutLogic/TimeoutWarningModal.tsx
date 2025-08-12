@@ -21,8 +21,10 @@ export const TimeoutWarningModal: React.FC<TimeoutWarningModalProps> = ({
     remainingTime
 }) => {
     const formatTime = (seconds: number): string => {
+        console.log('TimeoutWarningModal: Formatting time', seconds);
         const mins = Math.floor(seconds / 60);
         const secs = seconds % 60;
+        console.log('TimeoutWarningModal: Formatted time', `${mins}:${secs.toString().padStart(2, '0')}`);
         return `${mins}:${secs.toString().padStart(2, '0')}`;
     };
 

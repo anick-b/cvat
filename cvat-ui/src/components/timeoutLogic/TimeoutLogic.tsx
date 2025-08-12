@@ -21,6 +21,9 @@ export const TimeoutLogic: React.FC<TimeoutLogicProps> = ({ enabled = true }) =>
 
     const warningTimeoutRef = useRef<NodeJS.Timeout | null>(null);
     const countdownIntervalRef = useRef<NodeJS.Timeout | null>(null);
+    const isWarningModalOpenRef = useRef(false);
+
+
 
     const clearAllTimeouts = useCallback(() => {
         if (warningTimeoutRef.current) {
@@ -40,10 +43,12 @@ export const TimeoutLogic: React.FC<TimeoutLogicProps> = ({ enabled = true }) =>
 
         warningTimeoutRef.current = setTimeout(() => {
             console.log('TimeoutLogic: Warning timeout triggered - showing modal');
-            setWarningModalOpen(true);
             setRemainingTime(LOGOUT_TIMEOUT / 1000); // Convert to seconds for display
 
+            setWarningModalOpen(true);
+            console.log('TimeoutLogic: setWarningModalOpen', isWarningModalOpen);
             // Start countdown
+
             countdownIntervalRef.current = setInterval(() => {
                 setRemainingTime((prev) => {
                     const newTime = prev - 1;
@@ -57,7 +62,9 @@ export const TimeoutLogic: React.FC<TimeoutLogicProps> = ({ enabled = true }) =>
                     }
                     return newTime;
                 });
-            }, 1000); // Update every second
+            }, 1000); // Up
+
+            // date every second
         }, WARNING_TIMEOUT);
     }, [WARNING_TIMEOUT, LOGOUT_TIMEOUT, clearAllTimeouts, dispatch]);
 
@@ -66,16 +73,19 @@ export const TimeoutLogic: React.FC<TimeoutLogicProps> = ({ enabled = true }) =>
 
         console.log('TimeoutLogic: User activity detected');
 
-        if (isWarningModalOpen) {
-            // If modal is open, just reset the countdown
-            console.log('TimeoutLogic: Resetting countdown due to activity');
+        if (isWarningModalOpenRef.current) {            // If modal is open, just reset the countdown
+            console.log('---------------------------TimeoutLogic: isWarningModalOpen', isWarningModalOpen);
+
+            console.log('TimeoutLogic: setRemainingTime countdown due to activity');
             setRemainingTime(LOGOUT_TIMEOUT / 1000);
         } else {
             // Reset the warning timeout
-            console.log('TimeoutLogic: Resetting warning timeout due to activity');
+            console.log('---------------------------TimeoutLogic: isWarningModalOpen', isWarningModalOpen);
+
+            console.log('TimeoutLogic: startWarningTimeout warning timeout due to activity');
             startWarningTimeout();
         }
-    }, [enabled, isWarningModalOpen, startWarningTimeout]);
+    }, [enabled]);
 
     const handleStayLoggedIn = useCallback(() => {
         console.log('TimeoutLogic: User chose to stay logged in');
@@ -93,6 +103,11 @@ export const TimeoutLogic: React.FC<TimeoutLogicProps> = ({ enabled = true }) =>
         dispatch(logoutAsync());
     }, [clearAllTimeouts, dispatch]);
 
+
+
+
+
+
     useEffect(() => {
         if (!enabled) {
             console.log('TimeoutLogic: Component disabled');
@@ -100,7 +115,7 @@ export const TimeoutLogic: React.FC<TimeoutLogicProps> = ({ enabled = true }) =>
             return;
         }
 
-        console.log('TimeoutLogic: Setting up timeout logic');
+        console.log('TimeoutLogic: Setting up timeout logic----------------');
         addEventListeners(handleUserActivity);
         startWarningTimeout();
 
@@ -109,7 +124,10 @@ export const TimeoutLogic: React.FC<TimeoutLogicProps> = ({ enabled = true }) =>
             removeEventListeners(handleUserActivity);
             clearAllTimeouts();
         };
-    }, [enabled, handleUserActivity, startWarningTimeout, clearAllTimeouts]);
+    }, [enabled, handleUserActivity ]);
+    useEffect(() => {
+        isWarningModalOpenRef.current = isWarningModalOpen;
+    }, [isWarningModalOpen]);
 
     return (
         <TimeoutWarningModal

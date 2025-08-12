@@ -3,7 +3,7 @@
 #
 # SPDX-License-Identifier: MIT
 
-name: cvat
+name: eaip
 
 x-backend-env: &backend-env
   CVAT_POSTGRES_HOST: cvat_db
@@ -79,8 +79,8 @@ services:
       "--compact-cron", "0 3 * * *",
       ]
 
-  cvat_server:
-    container_name: cvat_server
+  eaip_server:
+    container_name: eaip_server
     image: cvat/server:${CVAT_VERSION:-dev}
     restart: always
     depends_on:
@@ -244,12 +244,12 @@ services:
     networks:
       - cvat
 
-  cvat_ui:
-    container_name: cvat_ui
+  eaip_ui:
+    container_name: eaip_ui
     image: cvat/ui:${CVAT_VERSION:-dev}
     restart: always
     depends_on:
-      - cvat_server
+      - eaip_server
     labels:
       traefik.enable: "true"
       traefik.http.services.cvat-ui.loadbalancer.server.port: "80"
