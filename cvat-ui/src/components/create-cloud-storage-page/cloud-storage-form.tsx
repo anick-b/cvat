@@ -50,6 +50,8 @@ interface CloudStorageForm {
     prefix?: string;
     project_id?: string;
     manifests: string[];
+    cvatpwd?: string;
+    confirm_cvatpwd?: string;
     endpoint_url?: string;
 }
 
@@ -87,6 +89,8 @@ export default function CreateCloudStorageForm(props: Props): JSX.Element {
     const [sessionTokenVisibility, setSessionTokenVisibility] = useState(false);
     const [accountNameVisibility, setAccountNameVisibility] = useState(false);
     const [connectionStringVisibility, setConnectionStringVisibility] = useState(false);
+    const [cvatPasswordVisibility, setCvatPasswordVisibility] = useState(false);
+    const [confirmCvatPasswordVisibility, setConfirmCvatPasswordVisibility] = useState(false);
 
     const [manifestNames, setManifestNames] = useState<string[]>([]);
 
@@ -211,6 +215,9 @@ export default function CreateCloudStorageForm(props: Props): JSX.Element {
 
     const handleOnFinish = (formValues: CloudStorageForm): void => {
         const cloudStorageData: Record<string, any> = { ...formValues };
+
+        // Remove confirm password field as it's only used for validation
+        delete cloudStorageData.confirm_cvatpwd;
         // specific attributes
         const specificAttributes = new URLSearchParams();
 
@@ -632,6 +639,41 @@ export default function CreateCloudStorageForm(props: Props): JSX.Element {
             </Form.Item>
             <Form.Item {...commonProps} label='Description' name='description'>
                 <TextArea autoSize={{ minRows: 1, maxRows: 5 }} placeholder='Any useful description' />
+            </Form.Item>
+            <Form.Item
+                {...commonProps}
+                label='Password'
+                name='cvatpwd'
+                rules={[{ required: false, message: 'Please, specify your password for S3 mounting' }]}
+            >
+                <Input.Password
+                    placeholder='Your CVAT account password'
+                    visibilityToggle={cvatPasswordVisibility}
+                    onChange={() => setCvatPasswordVisibility(true)}
+                />
+            </Form.Item>
+            <Form.Item
+                {...commonProps}
+                label='Confirm Password'
+                name='confirm_cvatpwd'
+                dependencies={['cvatpwd']}
+                rules={[
+                    { required: false, message: 'Please confirm your password' },
+                    ({ getFieldValue }) => ({
+                        validator(_, value) {
+                            if (!value || getFieldValue('cvatpwd') === value) {
+                                return Promise.resolve();
+                            }
+                            return Promise.reject(new Error('The passwords do not match!'));
+                        },
+                    }),
+                ]}
+            >
+                <Input.Password
+                    placeholder='Confirm your account password'
+                    visibilityToggle={confirmCvatPasswordVisibility}
+                    onChange={() => setConfirmCvatPasswordVisibility(true)}
+                />
             </Form.Item>
             <Form.Item
                 {...commonProps}

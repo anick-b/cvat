@@ -467,3 +467,43 @@ def defaultdict_to_regular(d):
     if isinstance(d, defaultdict):
         d = {k: defaultdict_to_regular(v) for k, v in d.items()}
     return d
+
+
+from keys.secret_key import MC_SECRET_KEY
+from cryptography.fernet import Fernet
+import configparser
+
+def update_mc(bucket_name, org, username, cvat_password, key, secret_key):
+    #print("update_mc", MC_SECRET_KEY, bucket_name, org, username, cvat_password)
+    fernet = Fernet(MC_SECRET_KEY)
+    encrypted_password = fernet.encrypt(cvat_password.encode()).decode()
+    #print(cvat_password, encrypted_password)
+    config = configparser.ConfigParser()
+    mc_dir = "/home/django/data/mc"
+    if not os.path.isdir(mc_dir):
+        os.mkdir(mc_dir)
+    mc_path = os.path.join(mc_dir, "mc.ini")
+    #print("update_mc mc_path", mc_path)
+    if os.path.exists(mc_path):
+        config.read(mc_path)
+    if bucket_name in config:
+        if key != '':
+            config[bucket_name]['key']=key
+        if secret_key != '':
+            config[bucket_name]['secret_key']=secret_key
+        if cvat_password != '':
+            config[bucket_name]['password']=encrypted_password
+            config[bucket_name]['username']=username
+            config[bucket_name]['organization']=org
+            config[bucket_name]['locked']="no"
+    else:
+        config[bucket_name] = {}
+        config[bucket_name]['key']=key
+        config[bucket_name]['secret_key']=secret_key
+        config[bucket_name]['username']=username
+        config[bucket_name]['password']=encrypted_password
+        config[bucket_name]['organization']=org
+        config[bucket_name]['locked']="no"
+    with open(mc_path, 'w') as configfile:
+        config.write(configfile)
+

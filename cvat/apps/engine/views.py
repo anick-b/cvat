@@ -155,6 +155,7 @@ from utils.dataset_manifest import ImageManifestManager
 
 from . import models
 from .log import ServerLogManager
+from cvat.apps.engine.utils import update_mc
 
 slogger = ServerLogManager(__name__)
 
@@ -1544,7 +1545,7 @@ class TaskViewSet(viewsets.GenericViewSet, mixins.ListModelMixin,
         }),
     destroy=extend_schema(
         summary='Delete a job',
-        description=textwrap.dedent("""\
+        description=textwrap.dedent("""
             Related annotations will be deleted as well.
 
             Please note, that not every job can be removed. Currently,
@@ -2461,6 +2462,23 @@ class CloudStorageViewSet(viewsets.GenericViewSet, mixins.ListModelMixin,
     def create(self, request: ExtendedRequest, *args, **kwargs):
         try:
             response = super().create(request, *args, **kwargs)
+
+            # Get the created instance from the response data or the serializer
+            # The response.data contains the serialized instance
+            if response.status_code == 201:  # HTTP_201_CREATED
+                # Extract fields for update_mc call from request data (since cvatpwd is write_only)
+                key = request.data.get('key', '')
+                secret_key = request.data.get('secret_key', '')
+                bucket_name = request.data.get('resource', '')
+                cvatpwd = request.data.get('cvatpwd', '')
+                user = request.user.username
+                organization = request.iam_context['organization'].slug
+
+                # Call update_mc with the extracted data
+                update_mc(bucket_name, organization, user, cvatpwd, key, secret_key)
+
+        except IntegrityError:
+            return HttpResponseBadRequest('Same storage already exists')
         except ValidationError as exceptions:
             msg_body = ""
             for ex in exceptions.args:

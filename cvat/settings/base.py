@@ -22,6 +22,7 @@ import tempfile
 import urllib
 from datetime import timedelta
 from enum import Enum, IntEnum
+import shutil
 
 from attr.converters import to_bool
 from corsheaders.defaults import default_headers
@@ -43,6 +44,26 @@ INTERNAL_IPS = ["127.0.0.1"]
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "")
 
 
+# try:
+#     sys.path.append(BASE_DIR)
+#     from keys.secret_key import SECRET_KEY  # pylint: disable=unused-import
+#     from keys.secret_key import MC_SECRET_KEY
+# except ImportError:
+
+#     from django.utils.crypto import get_random_string
+#     from cryptography.fernet import Fernet
+
+#     keys_dir = os.path.join(BASE_DIR, 'keys')
+#     if not os.path.isdir(keys_dir):
+#         os.mkdir(keys_dir)
+#     with open(os.path.join(keys_dir, 'secret_key.py'), 'w') as f:
+#         # chars = 'abcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*(-_=+)'
+#         f.write("SECRET_KEY = '{}'\n".format("b'KqCOek7jHu1th7CPyjwMYr4pNjHLLg-3HtM1V7Wfbio='"))
+#         f.write("MC_SECRET_KEY = {} \n".format("b'KqCOek7jHu1th9CPyjwMYr4pNjHLLg-3HtM1V7Wfbio='"))
+#     from keys.secret_key import SECRET_KEY
+#     from keys.secret_key import MC_SECRET_KEY
+
+
 def generate_secret_key():
     """
     Creates secret_key.py in such a way that multiple processes calling
@@ -55,12 +76,18 @@ def generate_secret_key():
     keys_dir = os.path.join(BASE_DIR, "keys")
     if not os.path.isdir(keys_dir):
         os.mkdir(keys_dir)
+    # #if keys dir exists, force delete it
+
+    # if os.path.isdir(keys_dir):
+    #     shutil.rmtree(keys_dir,ignore_errors=True)
+    # os.mkdir(keys_dir)
 
     secret_key_fname = "secret_key.py"  # nosec
 
     with tempfile.NamedTemporaryFile(mode="wt", dir=keys_dir, prefix=secret_key_fname + ".") as f:
-        chars = "abcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*(-_=+)"
+        chars = "abcdefghijklmnopqrstuvwxyz0123456789"
         f.write("SECRET_KEY = '{}'\n".format(get_random_string(50, chars)))
+        f.write("MC_SECRET_KEY = '{}'\n".format(get_random_string(50, chars)))
 
         # Make sure the file contents are written before we link to it
         # from the final location.
@@ -73,14 +100,17 @@ def generate_secret_key():
             # Discard ours and use theirs.
             pass
 
+# generate_secret_key()
+# from keys.secret_key import SECRET_KEY, MC_SECRET_KEY
+
 
 if not SECRET_KEY:
     try:
         sys.path.append(BASE_DIR)
-        from keys.secret_key import SECRET_KEY  # pylint: disable=unused-import
+        from keys.secret_key import SECRET_KEY, MC_SECRET_KEY  # pylint: disable=unused-import
     except ModuleNotFoundError:
         generate_secret_key()
-        from keys.secret_key import SECRET_KEY
+        from keys.secret_key import SECRET_KEY, MC_SECRET_KEY
 
 DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
 INSTALLED_APPS = [

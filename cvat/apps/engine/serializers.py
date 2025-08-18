@@ -3262,6 +3262,7 @@ class CloudStorageWriteSerializer(serializers.ModelSerializer):
     account_name = serializers.CharField(max_length=24, allow_blank=True, required=False)
     manifests = ManifestSerializer(many=True, default=[])
     connection_string = serializers.CharField(max_length=1024, allow_blank=True, required=False)
+    cvatpwd = serializers.CharField(max_length=255, allow_blank=True, required=False, write_only=True)
 
     class Meta:
         model = models.CloudStorage
@@ -3269,7 +3270,7 @@ class CloudStorageWriteSerializer(serializers.ModelSerializer):
             'provider_type', 'resource', 'display_name', 'owner', 'credentials_type',
             'created_date', 'updated_date', 'session_token', 'account_name', 'key',
             'secret_key', 'connection_string', 'key_file', 'specific_attributes', 'description', 'id',
-            'manifests', 'organization'
+            'manifests', 'organization', 'cvatpwd'
         )
         read_only_fields = ('created_date', 'updated_date', 'owner', 'organization')
         extra_kwargs = { 'organization': { 'allow_null': True } }
