@@ -3456,8 +3456,20 @@ class CloudStorageWriteSerializer(serializers.ModelSerializer):
         if storage_status == Status.AVAILABLE:
             new_manifest_names = set(i.get('filename') for i in validated_data.get('manifests', []))
             previous_manifest_names = set(i.filename for i in instance.manifests.all())
-            delta_to_delete = tuple(previous_manifest_names - new_manifest_names)
-            delta_to_create = tuple(new_manifest_names - previous_manifest_names)
+            # delta_to_delete = tuple(previous_manifest_names - new_manifest_names)
+            # delta_to_create = tuple(new_manifest_names - previous_manifest_names)
+            add_only = "add_only"
+            if add_only in new_manifest_names:
+                # skip deletion if "add_only" is requested
+                delta_to_delete = []
+            else:
+                delta_to_delete = tuple(previous_manifest_names - new_manifest_names)
+
+            delta_to_create1 = tuple(new_manifest_names - previous_manifest_names)
+            # filter out the special marker
+            delta_to_create = tuple([x for x in delta_to_create1 if x != add_only])
+
+            # if cvatpwd is not None, check if it is correct
             if delta_to_delete:
                 instance.manifests.filter(filename__in=delta_to_delete).delete()
             if delta_to_create:
