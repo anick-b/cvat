@@ -6,11 +6,11 @@
 #
 
 services:
-  cvat_db:
+  eaipannotator_db:
     ports:
       - '127.0.0.1:5432:5432'
 
-  eaip_server:
+  eaipannotator_server:
     build:
       context: .
       args:
@@ -30,7 +30,7 @@ services:
     ports:
       - '127.0.0.1:9090:9090'
 
-  cvat_worker_export:
+  eaipannotator_worker_export:
     environment:
       # For debugging, make sure to set 1 process
       # Due to the supervisord specifics, the extra processes will fail and
@@ -42,7 +42,7 @@ services:
     ports:
       - '9092:9092'
 
-  cvat_worker_import:
+  eaipannotator_worker_import:
     environment:
       # For debugging, make sure to set 1 process
       # Due to the supervisord specifics, the extra processes will fail and
@@ -54,7 +54,7 @@ services:
     ports:
       - '127.0.0.1:9093:9093'
 
-  cvat_worker_quality_reports:
+  eaipannotator_worker_quality_reports:
     environment:
       # For debugging, make sure to set 1 process
       # Due to the supervisord specifics, the extra processes will fail and
@@ -66,7 +66,7 @@ services:
     ports:
       - '127.0.0.1:9094:9094'
 
-  cvat_worker_consensus:
+  eaipannotator_worker_consensus:
     environment:
       # For debugging, make sure to set 1 process
       # Due to the supervisord specifics, the extra processes will fail and
@@ -78,7 +78,7 @@ services:
     ports:
       - '127.0.0.1:9096:9096'
 
-  cvat_worker_annotation:
+  eaipannotator_worker_annotation:
     environment:
       # For debugging, make sure to set 1 process
       # Due to the supervisord specifics, the extra processes will fail and
@@ -90,7 +90,7 @@ services:
     ports:
       - '127.0.0.1:9091:9091'
 
-  eaip_ui:
+  eaipannotator_ui:
     build:
       context: .
       args:
@@ -100,22 +100,22 @@ services:
         socks_proxy:
       dockerfile: Dockerfile.ui
 
-  cvat_clickhouse:
+  eaipannotator_clickhouse:
     ports:
       - '127.0.0.1:8123:8123'
 
-  cvat_opa:
+  eaipannotator_opa:
     ports:
       - '127.0.0.1:8181:8181'
 
-  cvat_redis_inmem:
+  eaipannotator_redis_inmem:
     ports:
       - '127.0.0.1:6379:6379'
 
-  cvat_redis_ondisk:
+  eaipannotator_redis_ondisk:
     ports:
       - '127.0.0.1:6666:6666'
 
-  cvat_vector:
+  eaipannotator_vector:
     ports:
       - '127.0.0.1:8282:80'

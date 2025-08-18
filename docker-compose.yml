@@ -6,10 +6,10 @@
 name: eaip
 
 x-backend-env: &backend-env
-  CVAT_POSTGRES_HOST: cvat_db
-  CVAT_REDIS_INMEM_HOST: cvat_redis_inmem
+  CVAT_POSTGRES_HOST: eaipannotator_db
+  CVAT_REDIS_INMEM_HOST: eaipannotator_redis_inmem
   CVAT_REDIS_INMEM_PORT: 6379
-  CVAT_REDIS_ONDISK_HOST: cvat_redis_ondisk
+  CVAT_REDIS_ONDISK_HOST: eaipannotator_redis_ondisk
   CVAT_REDIS_ONDISK_PORT: 6666
   CVAT_LOG_IMPORT_ERRORS: 'true'
   CVAT_ALLOW_STATIC_CACHE: '${CVAT_ALLOW_STATIC_CACHE:-no}'
@@ -19,36 +19,36 @@ x-backend-env: &backend-env
   SMOKESCREEN_OPTS: ${SMOKESCREEN_OPTS:-}
 
 x-backend-deps: &backend-deps
-  cvat_redis_inmem:
+  eaipannotator_redis_inmem:
     condition: service_started
-  cvat_redis_ondisk:
+  eaipannotator_redis_ondisk:
     condition: service_started
-  cvat_db:
+  eaipannotator_db:
     condition: service_started
 
 x-clickhouse-env: &clickhouse-env
   CLICKHOUSE_HOST: clickhouse
   CLICKHOUSE_PORT: 8123
-  CLICKHOUSE_DB: cvat
+  CLICKHOUSE_DB: eaipannotator
   CLICKHOUSE_USER: user
   CLICKHOUSE_PASSWORD: user
 
 services:
-  cvat_db:
-    container_name: cvat_db
+  eaipannotator_db:
+    container_name: eaipannotator_db
     image: postgres:15-alpine
     restart: always
     environment:
       POSTGRES_USER: root
-      POSTGRES_DB: cvat
+      POSTGRES_DB: eaipannotator
       POSTGRES_HOST_AUTH_METHOD: trust
     volumes:
-      - cvat_db:/var/lib/postgresql/data
+      - eaipannotator_db:/var/lib/postgresql/data
     networks:
-      - cvat
+      - eaipannotator
 
-  cvat_redis_inmem:
-    container_name: cvat_redis_inmem
+  eaipannotator_redis_inmem:
+    container_name: eaipannotator_redis_inmem
     image: redis:7.2.3-alpine
     restart: always
     command: [
@@ -57,12 +57,12 @@ services:
       "--appendonly", "yes",
     ]
     volumes:
-      - cvat_inmem_db:/data
+      - eaipannotator_inmem_db:/data
     networks:
-      - cvat
+      - eaipannotator
 
-  cvat_redis_ondisk:
-    container_name: cvat_redis_ondisk
+  eaipannotator_redis_ondisk:
+    container_name: eaipannotator_redis_ondisk
     image: apache/kvrocks:2.12.1
     restart: always
     # The kvrocks image a) has a healthcheck command, and b) has a root process
@@ -72,20 +72,20 @@ services:
     # Use a separate init process as a workaround.
     init: true
     volumes:
-      - cvat_cache_db:/var/lib/kvrocks
+      - eaipannotator_cache_db:/var/lib/kvrocks
     networks:
-      - cvat
+      - eaipannotator
     command: [
       "--compact-cron", "0 3 * * *",
       ]
 
-  eaip_server:
-    container_name: eaip_server
+  eaipannotator_server:
+    container_name: eaipannotator_server
     image: cvat/server:${CVAT_VERSION:-dev}
     restart: always
     depends_on:
       <<: *backend-deps
-      cvat_opa:
+      eaipannotator_opa:
         condition:
           service_started
     environment:
@@ -100,23 +100,23 @@ services:
     command: init run server
     labels:
       traefik.enable: "true"
-      traefik.http.services.cvat.loadbalancer.server.port: "8080"
-      traefik.http.routers.cvat.rule:
+      traefik.http.services.eaipannotator.loadbalancer.server.port: "8080"
+      traefik.http.routers.eaipannotator.rule:
         Host(`${CVAT_HOST:-localhost}`) &&
         (PathPrefix(`/api/`) || PathPrefix(`/static/`) || PathPrefix(`/admin`)
           || PathPrefix(`/django-rq`))
-      traefik.http.routers.cvat.entrypoints: web
+      traefik.http.routers.eaipannotator.entrypoints: web
     volumes:
-      - cvat_data:/home/django/data
-      - cvat_keys:/home/django/keys
-      - cvat_logs:/home/django/logs
+      - eaipannotator_data:/home/django/data
+      - eaipannotator_keys:/home/django/keys
+      - eaipannotator_logs:/home/django/logs
     networks:
-      cvat:
+      eaipannotator:
         aliases:
-          - cvat-server
+          - eaipannotator-server
 
-  cvat_worker_utils:
-    container_name: cvat_worker_utils
+  eaipannotator_worker_utils:
+    container_name: eaipannotator_worker_utils
     image: cvat/server:${CVAT_VERSION:-dev}
     restart: always
     depends_on: *backend-deps
@@ -126,14 +126,14 @@ services:
       NUMPROCS: 1
     command: run worker notifications cleaning
     volumes:
-      - cvat_data:/home/django/data
-      - cvat_keys:/home/django/keys
-      - cvat_logs:/home/django/logs
+      - eaipannotator_data:/home/django/data
+      - eaipannotator_keys:/home/django/keys
+      - eaipannotator_logs:/home/django/logs
     networks:
-      - cvat
+      - eaipannotator
 
-  cvat_worker_import:
-    container_name: cvat_worker_import
+  eaipannotator_worker_import:
+    container_name: eaipannotator_worker_import
     image: cvat/server:${CVAT_VERSION:-dev}
     restart: always
     depends_on: *backend-deps
@@ -142,14 +142,14 @@ services:
       NUMPROCS: 2
     command: run worker import
     volumes:
-      - cvat_data:/home/django/data
-      - cvat_keys:/home/django/keys
-      - cvat_logs:/home/django/logs
+      - eaipannotator_data:/home/django/data
+      - eaipannotator_keys:/home/django/keys
+      - eaipannotator_logs:/home/django/logs
     networks:
-      - cvat
+      - eaipannotator
 
-  cvat_worker_export:
-    container_name: cvat_worker_export
+  eaipannotator_worker_export:
+    container_name: eaipannotator_worker_export
     image: cvat/server:${CVAT_VERSION:-dev}
     restart: always
     depends_on: *backend-deps
@@ -158,14 +158,14 @@ services:
       NUMPROCS: 2
     command: run worker export
     volumes:
-      - cvat_data:/home/django/data
-      - cvat_keys:/home/django/keys
-      - cvat_logs:/home/django/logs
+      - eaipannotator_data:/home/django/data
+      - eaipannotator_keys:/home/django/keys
+      - eaipannotator_logs:/home/django/logs
     networks:
-      - cvat
+      - eaipannotator
 
-  cvat_worker_annotation:
-    container_name: cvat_worker_annotation
+  eaipannotator_worker_annotation:
+    container_name: eaipannotator_worker_annotation
     image: cvat/server:${CVAT_VERSION:-dev}
     restart: always
     depends_on: *backend-deps
@@ -174,14 +174,14 @@ services:
       NUMPROCS: 1
     command: run worker annotation
     volumes:
-      - cvat_data:/home/django/data
-      - cvat_keys:/home/django/keys
-      - cvat_logs:/home/django/logs
+      - eaipannotator_data:/home/django/data
+      - eaipannotator_keys:/home/django/keys
+      - eaipannotator_logs:/home/django/logs
     networks:
-      - cvat
+      - eaipannotator
 
-  cvat_worker_webhooks:
-    container_name: cvat_worker_webhooks
+  eaipannotator_worker_webhooks:
+    container_name: eaipannotator_worker_webhooks
     image: cvat/server:${CVAT_VERSION:-dev}
     restart: always
     depends_on: *backend-deps
@@ -190,14 +190,14 @@ services:
       NUMPROCS: 1
     command: run worker webhooks
     volumes:
-      - cvat_data:/home/django/data
-      - cvat_keys:/home/django/keys
-      - cvat_logs:/home/django/logs
+      - eaipannotator_data:/home/django/data
+      - eaipannotator_keys:/home/django/keys
+      - eaipannotator_logs:/home/django/logs
     networks:
-      - cvat
+      - eaipannotator
 
-  cvat_worker_quality_reports:
-    container_name: cvat_worker_quality_reports
+  eaipannotator_worker_quality_reports:
+    container_name: eaipannotator_worker_quality_reports
     image: cvat/server:${CVAT_VERSION:-dev}
     restart: always
     depends_on: *backend-deps
@@ -206,14 +206,14 @@ services:
       NUMPROCS: 1
     command: run worker quality_reports
     volumes:
-      - cvat_data:/home/django/data
-      - cvat_keys:/home/django/keys
-      - cvat_logs:/home/django/logs
+      - eaipannotator_data:/home/django/data
+      - eaipannotator_keys:/home/django/keys
+      - eaipannotator_logs:/home/django/logs
     networks:
-      - cvat
+      - eaipannotator
 
-  cvat_worker_chunks:
-    container_name: cvat_worker_chunks
+  eaipannotator_worker_chunks:
+    container_name: eaipannotator_worker_chunks
     image: cvat/server:${CVAT_VERSION:-dev}
     restart: always
     depends_on: *backend-deps
@@ -222,14 +222,14 @@ services:
       NUMPROCS: 2
     command: run worker chunks
     volumes:
-      - cvat_data:/home/django/data
-      - cvat_keys:/home/django/keys
-      - cvat_logs:/home/django/logs
+      - eaipannotator_data:/home/django/data
+      - eaipannotator_keys:/home/django/keys
+      - eaipannotator_logs:/home/django/logs
     networks:
-      - cvat
+      - eaipannotator
 
-  cvat_worker_consensus:
-    container_name: cvat_worker_consensus
+  eaipannotator_worker_consensus:
+    container_name: eaipannotator_worker_consensus
     image: cvat/server:${CVAT_VERSION:-dev}
     restart: always
     depends_on: *backend-deps
@@ -238,25 +238,25 @@ services:
       NUMPROCS: 1
     command: run worker consensus
     volumes:
-      - cvat_data:/home/django/data
-      - cvat_keys:/home/django/keys
-      - cvat_logs:/home/django/logs
+      - eaipannotator_data:/home/django/data
+      - eaipannotator_keys:/home/django/keys
+      - eaipannotator_logs:/home/django/logs
     networks:
-      - cvat
+      - eaipannotator
 
-  eaip_ui:
-    container_name: eaip_ui
+  eaipannotator_ui:
+    container_name: eaipannotator_ui
     image: cvat/ui:${CVAT_VERSION:-dev}
     restart: always
     depends_on:
-      - eaip_server
+      - eaipannotator_server
     labels:
       traefik.enable: "true"
-      traefik.http.services.cvat-ui.loadbalancer.server.port: "80"
-      traefik.http.routers.cvat-ui.rule: Host(`${CVAT_HOST:-localhost}`)
-      traefik.http.routers.cvat-ui.entrypoints: web
+      traefik.http.services.eaipannotator-ui.loadbalancer.server.port: "80"
+      traefik.http.routers.eaipannotator-ui.rule: Host(`${CVAT_HOST:-localhost}`)
+      traefik.http.routers.eaipannotator-ui.entrypoints: web
     networks:
-      - cvat
+      - eaipannotator
 
   traefik:
     image: traefik:v3.3
@@ -287,7 +287,7 @@ services:
       TRAEFIK_LOG_FORMAT: json
       TRAEFIK_ENTRYPOINTS_web_ADDRESS: :8080
       TRAEFIK_PROVIDERS_DOCKER_EXPOSEDBYDEFAULT: "false"
-      TRAEFIK_PROVIDERS_DOCKER_NETWORK: cvat
+      TRAEFIK_PROVIDERS_DOCKER_NETWORK: eaipannotator
       TRAEFIK_PROVIDERS_FILE_DIRECTORY: /etc/traefik/rules
     # Uncomment to get Traefik dashboard
     #   TRAEFIK_API_DASHBOARD: "true"
@@ -301,64 +301,64 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - ./components/analytics/grafana_conf.yml:/etc/traefik/rules/grafana_conf.yml:ro
     networks:
-      - cvat
+      - eaipannotator
     logging:
       driver: "json-file"
       options:
         max-size: 100m
         max-file: "10"
 
-  cvat_opa:
-    container_name: cvat_opa
+  eaipannotator_opa:
+    container_name: eaipannotator_opa
     image: openpolicyagent/opa:0.63.0
     restart: always
     networks:
-      cvat:
+      eaipannotator:
         aliases:
           - opa
     command:
       - run
       - --server
       - --log-level=error
-      - --set=services.cvat.url=http://cvat-server:8080
-      - --set=bundles.cvat.service=cvat
-      - --set=bundles.cvat.resource=/api/auth/rules
-      - --set=bundles.cvat.polling.min_delay_seconds=5
-      - --set=bundles.cvat.polling.max_delay_seconds=15
+      - --set=services.eaipannotator.url=http://eaipannotator-server:8080
+      - --set=bundles.eaipannotator.service=eaipannotator
+      - --set=bundles.eaipannotator.resource=/api/auth/rules
+      - --set=bundles.eaipannotator.polling.min_delay_seconds=5
+      - --set=bundles.eaipannotator.polling.max_delay_seconds=15
 
-  cvat_clickhouse:
-    container_name: cvat_clickhouse
+  eaipannotator_clickhouse:
+    container_name: eaipannotator_clickhouse
     image: clickhouse/clickhouse-server:23.11-alpine
     restart: always
     environment:
       <<: *clickhouse-env
     networks:
-      cvat:
+      eaipannotator:
         aliases:
           - clickhouse
     volumes:
       - ./components/analytics/clickhouse/init.sh:/docker-entrypoint-initdb.d/init.sh:ro
-      - cvat_events_db:/var/lib/clickhouse/
+      - eaipannotator_events_db:/var/lib/clickhouse/
 
-  cvat_vector:
-    container_name: cvat_vector
+  eaipannotator_vector:
+    container_name: eaipannotator_vector
     image: timberio/vector:0.26.0-alpine
     restart: always
     depends_on:
-      - cvat_clickhouse
+      - eaipannotator_clickhouse
     environment:
       <<: *clickhouse-env
     networks:
-      cvat:
+      eaipannotator:
         aliases:
           - vector
     volumes:
       - ./components/analytics/vector/vector.toml:/etc/vector/vector.toml:ro
 
-  cvat_grafana:
+  eaipannotator_grafana:
     image: grafana/grafana-oss:10.1.2
     restart: always
-    container_name: cvat_grafana
+    container_name: eaipannotator_grafana
     environment:
       <<: *clickhouse-env
       GF_PATHS_PROVISIONING: /etc/grafana/provisioning
@@ -397,7 +397,7 @@ services:
         cat << EOF > /etc/grafana/provisioning/dashboards/dashboard.yaml
         apiVersion: 1
         providers:
-          - name: cvat-logs
+          - name: eaipannotator-logs
             type: file
             updateIntervalSeconds: 30
             options:
@@ -406,18 +406,18 @@ services:
         EOF
         exec /run.sh
     networks:
-      cvat:
+      eaipannotator:
         aliases:
           - grafana
 
 volumes:
-  cvat_db:
-  cvat_data:
-  cvat_keys:
-  cvat_logs:
-  cvat_inmem_db:
-  cvat_events_db:
-  cvat_cache_db:
+  eaipannotator_db:
+  eaipannotator_data:
+  eaipannotator_keys:
+  eaipannotator_logs:
+  eaipannotator_inmem_db:
+  eaipannotator_events_db:
+  eaipannotator_cache_db:
 
 networks:
-  cvat:
+  eaipannotator:

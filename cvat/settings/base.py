@@ -743,7 +743,7 @@ CVAT_BASE_URL = os.getenv("CVAT_BASE_URL", f"http://{CVAT_HOST}:8080").rstrip("/
 
 CLICKHOUSE = {
     "events": {
-        "NAME": os.getenv("CLICKHOUSE_DB", "cvat"),
+        "NAME": os.getenv("CLICKHOUSE_DB", "eaipannotator"),
         "HOST": os.getenv("CLICKHOUSE_HOST", "localhost"),
         "PORT": os.getenv("CLICKHOUSE_PORT", 8123),
         "USER": os.getenv("CLICKHOUSE_USER", "user"),
@@ -767,13 +767,13 @@ else:
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "HOST": os.getenv("CVAT_POSTGRES_HOST", "cvat_db"),
-        "NAME": os.getenv("CVAT_POSTGRES_DBNAME", "cvat"),
+        "HOST": os.getenv("CVAT_POSTGRES_HOST", "eaipannotator_db"),
+        "NAME": os.getenv("CVAT_POSTGRES_DBNAME", "eaipannotator"),
         "USER": os.getenv("CVAT_POSTGRES_USER", "root"),
         "PASSWORD": postgres_password,
         "PORT": os.getenv("CVAT_POSTGRES_PORT", 5432),
         "OPTIONS": {
-            "application_name": os.getenv("CVAT_POSTGRES_APPLICATION_NAME", "cvat"),
+            "application_name": os.getenv("CVAT_POSTGRES_APPLICATION_NAME", "eaipannotator"),
         },
     }
 }

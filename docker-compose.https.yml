@@ -1,24 +1,24 @@
 version: '3.3'
 
 services:
-  cvat_server:
+  eaipannotator_server:
     labels:
-      - traefik.http.routers.cvat.entrypoints=websecure
-      - traefik.http.routers.cvat.tls=true
-      # - traefik.http.routers.cvat.tls.certresolver=lets-encrypt
+      - traefik.http.routers.eaipannotator.entrypoints=websecure
+      - traefik.http.routers.eaipannotator.tls=true
+      # - traefik.http.routers.eaipannotator.tls.certresolver=lets-encrypt
 
-  cvat_ui:
+  eaipannotator_ui:
     labels:
-      - traefik.http.routers.cvat-ui.entrypoints=websecure
-      - traefik.http.routers.cvat-ui.tls=true
-      # - traefik.http.routers.cvat-ui.tls.certresolver=lets-encrypt
+      - traefik.http.routers.eaipannotator-ui.entrypoints=websecure
+      - traefik.http.routers.eaipannotator-ui.tls=true
+      # - traefik.http.routers.eaipannotator-ui.tls.certresolver=lets-encrypt
 
   traefik:
     image: traefik:v2.4
     container_name: traefik
     command:
       - "--providers.docker.exposedByDefault=false"
-      - "--providers.docker.network=cvat"
+      - "--providers.docker.network=eaipannotator"
       - '--providers.file.directory=/etc/traefik/rules'
       - "--entryPoints.web.address=:80"
       - "--entryPoints.web.http.redirections.entryPoint.to=websecure"
@@ -36,13 +36,13 @@ services:
       - 80:80
       - 443:443
     volumes:
-      # - cvat_letsencrypt:/letsencrypt
-      - cvat_certs:/certs/:ro
+      # - eaipannotator_letsencrypt:/letsencrypt
+      - eaipannotator_certs:/certs/:ro
       - ./traefik.yml:/etc/traefik/dynamic_conf/traefik.yml:ro
 
 volumes:
-  # cvat_letsencrypt:
-  cvat_certs:
+  # eaipannotator_letsencrypt:
+  eaipannotator_certs:
     driver_opts:
       type: none
       device: /home/sr/Anick/outdu-cvat/cvat_jnj_new/cvat/ssl

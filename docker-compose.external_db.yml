@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: MIT
 
-# This optional Docker Compose file may be used to deploy CVAT with an external database.
+# This optional Docker Compose file may be used to deploy EAIP Annotator with an external database.
 
 x-backend-settings: &backend-settings
   environment:
@@ -15,19 +15,19 @@ x-backend-settings: &backend-settings
     - postgres_password
 
 services:
-  cvat_db:
+  eaipannotator_db:
     deploy:
       replicas: 0
 
-  cvat_server: *backend-settings
-  cvat_worker_utils: *backend-settings
-  cvat_worker_annotation: *backend-settings
-  cvat_worker_export: *backend-settings
-  cvat_worker_import: *backend-settings
-  cvat_worker_quality_reports: *backend-settings
-  cvat_worker_webhooks: *backend-settings
-  cvat_worker_chunks: *backend-settings
-  cvat_worker_consensus: *backend-settings
+  eaipannotator_server: *backend-settings
+  eaipannotator_worker_utils: *backend-settings
+  eaipannotator_worker_annotation: *backend-settings
+  eaipannotator_worker_export: *backend-settings
+  eaipannotator_worker_import: *backend-settings
+  eaipannotator_worker_quality_reports: *backend-settings
+  eaipannotator_worker_webhooks: *backend-settings
+  eaipannotator_worker_chunks: *backend-settings
+  eaipannotator_worker_consensus: *backend-settings
 
 secrets:
   postgres_password:

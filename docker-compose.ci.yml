@@ -5,14 +5,14 @@
 #
 
 services:
-  cvat_ci:
-    image: cvat_ci
+  eaipannotator_ci:
+    image: eaipannotator_ci
     network_mode: host
     build:
       context: .
       dockerfile: Dockerfile.ci
     depends_on:
-      - cvat_server
+      - eaipannotator_server
     environment:
       CONTAINER_COVERAGE_DATA_DIR:
       GITHUB_ACTIONS:

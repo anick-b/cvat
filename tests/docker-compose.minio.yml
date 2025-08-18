@@ -5,10 +5,10 @@ x-allow-minio: &allow-minio
     - ./tests/allow_minio.sh:/etc/cvat/init.d/allow_minio.sh:ro
 
 services:
-  cvat_server: *allow-minio
-  cvat_worker_export: *allow-minio
-  cvat_worker_import: *allow-minio
-  cvat_worker_chunks: *allow-minio
+  eaipannotator_server: *allow-minio
+  eaipannotator_worker_export: *allow-minio
+  eaipannotator_worker_import: *allow-minio
+  eaipannotator_worker_chunks: *allow-minio
 
   minio:
     image: quay.io/minio/minio:RELEASE.2022-09-17T00-09-45Z
@@ -30,7 +30,7 @@ services:
       timeout: 20s
       retries: 3
     networks:
-      cvat:
+      eaipannotator:
         aliases:
           - minio
   mc:
@@ -50,7 +50,7 @@ services:
     volumes:
       - ./tests/cypress/e2e/actions_tasks/assets/case_65_manifest/:/storage
     networks:
-      - cvat
+      - eaipannotator
     entrypoint: >
       /bin/sh -c "
       $${MC_PATH} config host add --quiet --api s3v4 $${MINIO_ALIAS} $${MINIO_HOST} $${MINIO_ACCESS_KEY} $${MINIO_SECRET_KEY};

@@ -1,4 +1,4 @@
 services:
-  cvat_server:
+  eaipannotator_server:
     environment:
       DJANGO_SETTINGS_MODULE: cvat.settings.email_settings
