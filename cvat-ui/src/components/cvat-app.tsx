@@ -576,7 +576,12 @@ class CVATApplication extends React.PureComponent<CVATAppProps & RouteComponentP
                                         <Redirect
                                             push
                                             to={{
+<<<<<<< Updated upstream
                                                 pathname: queryParams.get('next') || '/tasks',
+=======
+                                                //pathname: queryParams.get('next') || '/tasks',                              //Old
+                                                pathname: queryParams.get('next') || '/organization',                         //New
+>>>>>>> Stashed changes
                                                 search: authParams ? new URLSearchParams(authParams).toString() : '',
                                             }}
                                         />

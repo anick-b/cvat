@@ -549,8 +549,16 @@ LOGGING = {
             "level": "DEBUG",
             "filename": os.path.join(BASE_DIR, "logs", "cvat_server_dataset.log"),
             "formatter": "standard",
+<<<<<<< Updated upstream
             "maxBytes": 1024 * 1024 * 50,  # 50 MB
             "backupCount": 3,
+=======
+            #"maxBytes": 1024 * 1024 * 50,  # 50 MB
+            #"backupCount": 3,
+            "when": "midnight",                                                        #Added
+            "interval": 1,                                                             #Added
+            "backupCount": 90,                                                         #Added
+>>>>>>> Stashed changes
         },
         "vector": {
             "level": "INFO",

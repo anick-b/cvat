@@ -53,7 +53,11 @@ class DatasetLogManager:
         self.glob.error(log_error)
 
 
+<<<<<<< Updated upstream
 def get_logger(logger_name, log_file):
+=======
+def get_logger(logger_name="eaip", log_file=None):   # Set default logger_name to "eaip"
+>>>>>>> Stashed changes
     logger = logging.getLogger(name=logger_name)
     logger.setLevel(logging.INFO)
     file_handler = logging.FileHandler(log_file)
@@ -65,7 +69,11 @@ def get_logger(logger_name, log_file):
     return logger
 
 
+<<<<<<< Updated upstream
 vlogger = logging.getLogger("vector")
+=======
+vlogger = logging.getLogger("vector")   # Change from "vector" to "eaip"
+>>>>>>> Stashed changes
 
 
 def get_migration_log_dir() -> str:
