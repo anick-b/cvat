@@ -4,7 +4,7 @@
 
 metadata:
   name: pth-facebookresearch-sam-vit-h
-  namespace: cvat
+  namespace: eaip
   annotations:
     name: Segment Anything
     version: 2
@@ -26,7 +26,7 @@ spec:
       value: /opt/nuclio/sam
 
   build:
-    image: cvat.pth.facebookresearch.sam.vit_h:latest-gpu
+    image: eaip.pth.facebookresearch.sam.vit_h:latest-gpu
     baseImage: ubuntu:22.04
 
     directives:
