@@ -54,20 +54,21 @@ import withVisibilityHandling from './handle-popover-visibility';
 import ToolsTooltips from './interactor-tooltips';
 
 interface StateToProps {
-    canvasInstance: Canvas;
-    labels: Label[];
-    states: ObjectState[];
-    activeLabelID: number | null;
-    jobInstance: Job;
-    isActivated: boolean;
-    frame: number;
     interactors: MLModel[];
     detectors: MLModel[];
     trackers: MLModel[];
+    isActivated: boolean;
+    activeLabelID: number | null;
+    labels: any[];
+    states: any[];
+    canvasInstance: Canvas;
+    jobInstance: Job;
+    frame: number;
     curZOrder: number;
     defaultApproxPolyAccuracy: number;
     toolsBlockerState: ToolsBlockerState;
     frameIsDeleted: boolean;
+    user: any; // Add user to the interface
 }
 
 interface DispatchToProps {
@@ -103,12 +104,55 @@ function mapStateToProps(state: CombinedState): StateToProps {
         settings: {
             workspace: { toolsBlockerState, defaultApproxPolyAccuracy },
         },
+        auth: { user }, // Add user from auth state
     } = state;
 
+    // Helper function to check if SAM should be filtered out for this user
+    const shouldFilterSAM = (currentUser: any): boolean => {
+        if (!currentUser) return false;
+
+        // Filter SAM for 'worker' role users
+        if (currentUser.groups && !currentUser.groups.includes('worker')) {
+            return true;
+        }
+
+        // Filter SAM for users who are not admin/business/superuser
+        if (currentUser.groups &&
+            currentUser.groups.includes('admin') ||
+            currentUser.groups.includes('business') ||
+            currentUser.groups.includes('user') ||
+            // currentUser.groups.includes('worker') ||
+            currentUser.isSuperuser) {
+            return true;
+        }
+
+        // You can add more role-based conditions here
+        // Example: Filter for specific organization roles
+        // if (currentUser.organizationRole === 'worker') return true;
+
+        return false;
+    };
+
+    const filterSAMModels = (models: MLModel[]): MLModel[] => {
+        if (!shouldFilterSAM(user)) {
+            return models;
+        }
+
+        return models.filter((model: MLModel) => {
+            // Filter out SAM models - check both name and ID
+            const isSAMModel = model.name.toLowerCase().includes('sam') ||
+                             model.name.toLowerCase().includes('segment anything') ||
+                             model.id.toLowerCase().includes('sam') ||
+                             model.id.includes('facebookresearch-sam');
+
+            return !isSAMModel;
+        });
+    };
+
     return {
-        interactors,
-        detectors,
-        trackers,
+        interactors: filterSAMModels(interactors),
+        detectors: filterSAMModels(detectors),
+        trackers: filterSAMModels(trackers),
         isActivated: activeControl === ActiveControl.AI_TOOLS,
         activeLabelID,
         labels,
@@ -120,6 +164,7 @@ function mapStateToProps(state: CombinedState): StateToProps {
         defaultApproxPolyAccuracy,
         toolsBlockerState,
         frameIsDeleted,
+        user,
     };
 }
 

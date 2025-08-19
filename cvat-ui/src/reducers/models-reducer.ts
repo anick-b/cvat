@@ -46,7 +46,7 @@ export default function (state = defaultState, action: ModelsActions | AuthActio
                 },
             };
         }
-        case ModelsActionTypes.GET_MODELS_SUCCESS: {
+                case ModelsActionTypes.GET_MODELS_SUCCESS: {
             return {
                 ...state,
                 interactors: action.payload.models.filter((model: MLModel) => (

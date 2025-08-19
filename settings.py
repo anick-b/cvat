@@ -6,11 +6,14 @@ from django_auth_ldap.config import LDAPSearch, GroupOfNamesType, NestedActiveDi
 
 IAM_TYPE = 'LDAP'
 AUTH_LOGIN_NOTE = '''<p>
-    For successful login please make sure you are member of cvat_users group
+    For successful login please make sure you are member of one of the authorized groups:<br/>
+    - ITS-NPR-EDGEAI-EAIP-ADMIN (Platform Administrator)<br/>
+    - ITS-NPR-EDGEAI-AICOMODO-BUSINESSOWNER (Organization Maintainer)<br/>
+    - ITS-NPR-EDGEAI-AICOMODO-ENDUSER (Organization Supervisor/Worker)
 </p>'''
 
-# Baseline configuration - using host IP to reach host LDAP
-AUTH_LDAP_SERVER_URI = "ldap://192.168.1.143:389"
+# Baseline configuration - using OpenLDAP container IP on ldap-net network
+AUTH_LDAP_SERVER_URI = "ldap://172.21.0.3:389"
 #base path
 _BASE_PATH="dc=example,dc=org"
 # Credentials for LDAP server - using admin account for now
@@ -22,6 +25,8 @@ AUTH_LDAP_USER_SEARCH = LDAPSearch("ou=users,dc=example,dc=org", ldap.SCOPE_SUBT
 # Group search - using local group structure
 AUTH_LDAP_GROUP_SEARCH = LDAPSearch("ou=Security,ou=IDM,ou=Groups,dc=example,dc=org", ldap.SCOPE_SUBTREE,"(objectClass=*)")
 AUTH_LDAP_GROUP_TYPE = GroupOfNamesType()
+
+# Require users to be members of one of the authorized groups
 AUTH_LDAP_REQUIRE_GROUP = (
     LDAPGroupQuery('cn=ITS-NPR-EDGEAI-EAIP-ADMIN,ou=Security,ou=IDM,ou=Groups,dc=example,dc=org')
     | LDAPGroupQuery('cn=ITS-NPR-EDGEAI-AICOMODO-BUSINESSOWNER,ou=Security,ou=IDM,ou=Groups,dc=example,dc=org')
@@ -56,20 +61,41 @@ CSRF_TRUSTED_ORIGINS = ['https://localhost']
 # superuser.
 AUTHENTICATION_BACKENDS += ['django_auth_ldap.backend.LDAPBackend']
 
-# Map groups to CVAT roles - using local group structure
+# Map AD groups to CVAT roles according to requirements:
+# 1. ITS-NPR-EDGEAI-EAIP-ADMIN: Platform level admin
+#    - Can create/register new organizations
+#    - Can create/add new business owner users (maintainers)
+#    - Can add S3 buckets to organizations
+#    - No visibility to projects/tasks for data privacy
+#    - Can only invite "Maintainer" role users
 AUTH_LDAP_ADMIN_GROUPS = [
-    'cn=ITS-NPR-EDGEAI-ADMIN,ou=Security,ou=IDM,ou=Groups,dc=example,dc=org',
+    'cn=ITS-NPR-EDGEAI-EAIP-ADMIN,ou=Security,ou=IDM,ou=Groups,dc=example,dc=org',
 ]
+
+# 2. ITS-NPR-EDGEAI-AICOMODO-BUSINESSOWNER: Organization level maintainer
+#    - Can create users with "Supervisor" and "Worker" privileges
+#    - Can add S3 buckets for their organization
+#    - Can create projects, assign tasks, run auto-annotation
+#    - Can annotate and approve work
+#    - Cannot create other "Maintainer" users (only Platform Admin can)
 AUTH_LDAP_BUSINESS_GROUPS = [
     'cn=ITS-NPR-EDGEAI-AICOMODO-BUSINESSOWNER,ou=Security,ou=IDM,ou=Groups,dc=example,dc=org',
 ]
+
+# 3. ITS-NPR-EDGEAI-AICOMODO-ENDUSER: Organization level supervisor/worker
+#    - Supervisors: Can create projects, assign tasks, approve work
+#    - Workers: Can only see assigned tasks/jobs and annotate
+#    - No organization-level privileges (user creation, etc.)
 AUTH_LDAP_USER_GROUPS = [
     'cn=ITS-NPR-EDGEAI-AICOMODO-ENDUSER,ou=Security,ou=IDM,ou=Groups,dc=example,dc=org',
 ]
 
+# Map LDAP groups to CVAT internal roles
+# Note: Both user and worker roles map to the same AD group (ENDUSER)
+# The specific role assignment (supervisor vs worker) is handled at the organization level
 DJANGO_AUTH_LDAP_GROUPS = {
-        "admin": AUTH_LDAP_ADMIN_GROUPS,
-        "business": AUTH_LDAP_BUSINESS_GROUPS,
-        "user": AUTH_LDAP_USER_GROUPS,
-        "worker": AUTH_LDAP_USER_GROUPS,
+        "admin": AUTH_LDAP_ADMIN_GROUPS,        # Platform Administrator
+        "business": AUTH_LDAP_BUSINESS_GROUPS,  # Organization Maintainer
+        "user": AUTH_LDAP_USER_GROUPS,          # Organization Supervisor
+        "worker": AUTH_LDAP_USER_GROUPS,        # Organization Worker
         }
