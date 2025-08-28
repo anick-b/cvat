@@ -22,7 +22,6 @@ import tempfile
 import urllib
 from datetime import timedelta
 from enum import Enum, IntEnum
-import shutil
 
 from attr.converters import to_bool
 from corsheaders.defaults import default_headers
@@ -44,26 +43,6 @@ INTERNAL_IPS = ["127.0.0.1"]
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "")
 
 
-# try:
-#     sys.path.append(BASE_DIR)
-#     from keys.secret_key import SECRET_KEY  # pylint: disable=unused-import
-#     from keys.secret_key import MC_SECRET_KEY
-# except ImportError:
-
-#     from django.utils.crypto import get_random_string
-#     from cryptography.fernet import Fernet
-
-#     keys_dir = os.path.join(BASE_DIR, 'keys')
-#     if not os.path.isdir(keys_dir):
-#         os.mkdir(keys_dir)
-#     with open(os.path.join(keys_dir, 'secret_key.py'), 'w') as f:
-#         # chars = 'abcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*(-_=+)'
-#         f.write("SECRET_KEY = '{}'\n".format("b'KqCOek7jHu1th7CPyjwMYr4pNjHLLg-3HtM1V7Wfbio='"))
-#         f.write("MC_SECRET_KEY = {} \n".format("b'KqCOek7jHu1th9CPyjwMYr4pNjHLLg-3HtM1V7Wfbio='"))
-#     from keys.secret_key import SECRET_KEY
-#     from keys.secret_key import MC_SECRET_KEY
-
-
 def generate_secret_key():
     """
     Creates secret_key.py in such a way that multiple processes calling
@@ -76,18 +55,12 @@ def generate_secret_key():
     keys_dir = os.path.join(BASE_DIR, "keys")
     if not os.path.isdir(keys_dir):
         os.mkdir(keys_dir)
-    # #if keys dir exists, force delete it
-
-    # if os.path.isdir(keys_dir):
-    #     shutil.rmtree(keys_dir,ignore_errors=True)
-    # os.mkdir(keys_dir)
 
     secret_key_fname = "secret_key.py"  # nosec
 
     with tempfile.NamedTemporaryFile(mode="wt", dir=keys_dir, prefix=secret_key_fname + ".") as f:
-        chars = "abcdefghijklmnopqrstuvwxyz0123456789"
+        chars = "abcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*(-_=+)"
         f.write("SECRET_KEY = '{}'\n".format(get_random_string(50, chars)))
-        f.write("MC_SECRET_KEY = '{}'\n".format(get_random_string(50, chars)))
 
         # Make sure the file contents are written before we link to it
         # from the final location.
@@ -100,17 +73,14 @@ def generate_secret_key():
             # Discard ours and use theirs.
             pass
 
-# generate_secret_key()
-# from keys.secret_key import SECRET_KEY, MC_SECRET_KEY
-
 
 if not SECRET_KEY:
     try:
         sys.path.append(BASE_DIR)
-        from keys.secret_key import SECRET_KEY, MC_SECRET_KEY  # pylint: disable=unused-import
+        from keys.secret_key import SECRET_KEY  # pylint: disable=unused-import
     except ModuleNotFoundError:
         generate_secret_key()
-        from keys.secret_key import SECRET_KEY, MC_SECRET_KEY
+        from keys.secret_key import SECRET_KEY
 
 DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
 INSTALLED_APPS = [
@@ -537,20 +507,30 @@ LOGGING = {
             "formatter": "standard",
         },
         "server_file": {
-            "class": "logging.handlers.RotatingFileHandler",
+            #"class": "logging.handlers.RotatingFileHandler",                              #Original
+            "class": "logging.handlers.TimedRotatingFileHandler",                          #Modified
             "level": "DEBUG",
-            "filename": os.path.join(BASE_DIR, "logs", "cvat_server.log"),
+            #"filename": os.path.join(BASE_DIR, "logs", "cvat_server.log"),               #Original
+            "filename": os.path.join(BASE_DIR, "logs", "eaip_server.log"),                #Modified
             "formatter": "standard",
-            "maxBytes": 1024 * 1024 * 50,  # 50 MB
-            "backupCount": 5,
+            #"maxBytes": 1024 * 1024 * 50,  # 50 MB
+            #"backupCount": 5,
+            "when": "midnight",                                                            #Added
+            "interval": 1,                                                                 #Added
+            "backupCount": 90,                                                             #Added
         },
         "dataset_handler": {
-            "class": "logging.handlers.RotatingFileHandler",
+            #"class": "logging.handlers.RotatingFileHandler",                              #Original
+            "class": "logging.handlers.TimedRotatingFileHandler",                          #Modified
             "level": "DEBUG",
-            "filename": os.path.join(BASE_DIR, "logs", "cvat_server_dataset.log"),
+            #"filename": os.path.join(BASE_DIR, "logs", "cvat_server_dataset.log"),        #Original
+            "filename": os.path.join(BASE_DIR, "logs", "eaip_server_dataset.log"),         #Modified
             "formatter": "standard",
-            "maxBytes": 1024 * 1024 * 50,  # 50 MB
-            "backupCount": 3,
+            #"maxBytes": 1024 * 1024 * 50,  # 50 MB
+            #"backupCount": 3,
+            "when": "midnight",                                                        #Added
+            "interval": 1,                                                             #Added
+            "backupCount": 90,                                                        #Added
         },
         "vector": {
             "level": "INFO",
@@ -570,7 +550,8 @@ LOGGING = {
         "handlers": ["console", "server_file"],
     },
     "loggers": {
-        "cvat": {
+        #"cvat": {                                                                        #Original
+        "eaip": {                                                                         #Modified
             "level": os.getenv("DJANGO_LOG_LEVEL", "DEBUG"),
         },
         "dataset_logger": {
@@ -743,7 +724,7 @@ CVAT_BASE_URL = os.getenv("CVAT_BASE_URL", f"http://{CVAT_HOST}:8080").rstrip("/
 
 CLICKHOUSE = {
     "events": {
-        "NAME": os.getenv("CLICKHOUSE_DB", "eaipannotator"),
+        "NAME": os.getenv("CLICKHOUSE_DB", "cvat"),
         "HOST": os.getenv("CLICKHOUSE_HOST", "localhost"),
         "PORT": os.getenv("CLICKHOUSE_PORT", 8123),
         "USER": os.getenv("CLICKHOUSE_USER", "user"),
@@ -767,13 +748,13 @@ else:
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "HOST": os.getenv("CVAT_POSTGRES_HOST", "eaipannotator_db"),
-        "NAME": os.getenv("CVAT_POSTGRES_DBNAME", "eaipannotator"),
+        "HOST": os.getenv("CVAT_POSTGRES_HOST", "cvat_db"),
+        "NAME": os.getenv("CVAT_POSTGRES_DBNAME", "cvat"),
         "USER": os.getenv("CVAT_POSTGRES_USER", "root"),
         "PASSWORD": postgres_password,
         "PORT": os.getenv("CVAT_POSTGRES_PORT", 5432),
         "OPTIONS": {
-            "application_name": os.getenv("CVAT_POSTGRES_APPLICATION_NAME", "eaipannotator"),
+            "application_name": os.getenv("CVAT_POSTGRES_APPLICATION_NAME", "cvat"),
         },
     }
 }

@@ -30,7 +30,7 @@ class _LoggerAdapterMapping:
 
 
 class ServerLogManager:
-    def __init__(self, logger_name: str) -> None:
+    def __init__(self, logger_name: str="eaip") -> None:  # Set default logger_name to "eaip"
         self.glob = logging.getLogger(logger_name)
         self.project = _LoggerAdapterMapping(self.glob, "Project")
         self.task = _LoggerAdapterMapping(self.glob, "Task")
@@ -40,7 +40,7 @@ class ServerLogManager:
 
 class DatasetLogManager:
     def __init__(self, directory_depth=5) -> None:
-        self.glob = logging.getLogger("dataset_logger")
+        self.glob = logging.getLogger("dataset_logger")  # Change from "dataset_logger" to "eaip"
         self.directory_depth = directory_depth
 
     def log_import_error(self, entity, entity_id, format_name, base_error, dir_path) -> None:
@@ -53,7 +53,7 @@ class DatasetLogManager:
         self.glob.error(log_error)
 
 
-def get_logger(logger_name, log_file):
+def get_logger(logger_name="eaip", log_file=None):  # Set default logger_name to "eaip"
     logger = logging.getLogger(name=logger_name)
     logger.setLevel(logging.INFO)
     file_handler = logging.FileHandler(log_file)
@@ -65,7 +65,7 @@ def get_logger(logger_name, log_file):
     return logger
 
 
-vlogger = logging.getLogger("vector")
+vlogger = logging.getLogger("vector")  # Change from "vector" to "eaip"
 
 
 def get_migration_log_dir() -> str:
