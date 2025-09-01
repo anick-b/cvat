@@ -67,3 +67,7 @@ cvat-ui/dist
 # produced by allure report
 /**/allure-report*
 /**/allure-results*
+
+#Added sonar folder to git ignore
+.sonar/
+
