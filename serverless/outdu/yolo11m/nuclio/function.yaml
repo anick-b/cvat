@@ -89,7 +89,7 @@ metadata:
       ]
 spec:
   description: YOLO v11m via pytorch
-  runtime: 'python:3.11'
+  runtime: 'python:3.10'
   handler: main:handler
   eventTimeout: 30s
   env:

@@ -1,8 +1,8 @@
 metadata:
-  name: onnx-wongkinyiu-yolov7
+  name: outdu-yolo-yolo11m
   namespace: cvat
   annotations:
-    name: YOLO v7
+    name: YOLO v11m
     type: detector
     spec: |
       [
@@ -89,12 +89,15 @@ metadata:
       ]
 
 spec:
-  description: YOLO v7 via onnx-runtime
-  runtime: 'python:3.8'
+  description: YOLO v11m via pytorch
+  runtime: 'python:3.10'
   handler: main:handler
   eventTimeout: 30s
+  env:
+    - name: PYTHONPATH
+      value: /opt/nuclio/yolo11m
   build:
-    image: cvat.onnx.wongkinyiu.yolov7:latest-gpu
+    image: cvat.pytorch.outdu.yolov11m
     baseImage: nvidia/cuda:12.6.3-cudnn-runtime-ubuntu22.04
 
     directives:
@@ -103,14 +106,14 @@ spec:
           value: root
         - kind: RUN
           value: apt update && apt install --no-install-recommends -y wget python3-pip
+        - kind: RUN
+         value: apt-get -y install libgl1-mesa-glx libglib2.0-dev
+        - kind: RUN
+          value: pip install torch torchvision opencv-python pillow pyyaml tqdm ultralytics msgpack
         - kind: WORKDIR
           value: /opt/nuclio
         - kind: RUN
-          value: pip install onnxruntime-gpu=='1.20.*' opencv-python-headless pillow pyyaml
-        - kind: WORKDIR
-          value: /opt/nuclio
-        - kind: RUN
-          value: wget https://github.com/WongKinYiu/yolov7/releases/download/v0.1/yolov7-nms-640.onnx
+          value: wget https://github.com/ultralytics/assets/releases/download/v8.3.0/yolo11m.pt
         - kind: RUN
           value: ln -s /usr/bin/python3 /usr/bin/python
 
