@@ -63,15 +63,15 @@ export default function ProjectActionsItems(
     //     label: <Link to={`/projects/${projectId}/analytics`}>View analytics</Link>,
     // }, 40]);
 
-    menuItems.push([{
-        key: 'quality-control',
-        label: <Link to={`/projects/${projectId}/quality-control`}>Quality control</Link>,
-    }, 50]);
+    // menuItems.push([{
+    //    key: 'quality-control',
+    //     label: <Link to={`/projects/${projectId}/quality-control`}>Quality control</Link>,
+    // }, 50]);
 
-    menuItems.push([{
-        key: 'set-webhooks',
-        label: <Link to={`/projects/${projectId}/webhooks`}>Setup webhooks</Link>,
-    }, 60]);
+    // menuItems.push([{
+    //     key: 'set-webhooks',
+    //     label: <Link to={`/projects/${projectId}/webhooks`}>Setup webhooks</Link>,
+    // }, 60]);
 
     menuItems.push([{
         type: 'divider',
