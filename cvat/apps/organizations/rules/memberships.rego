@@ -103,9 +103,10 @@ allow if {
 # owner of the organization can change the role of any member and remove any member except himself
 allow if {
     input.scope in {utils.CHANGE_ROLE, utils.DELETE}
+    input.resource.is_active
     input.resource.organization.id == input.auth.organization.id
-    utils.has_perm(utils.USER)
-    organizations.is_owner
+    utils.has_perm(utils.BUSINESS)
+    organizations.is_maintainer
     input.resource.user.id != input.auth.user.id
     input.resource.role != organizations.OWNER
 }
@@ -118,5 +119,7 @@ allow if {
     input.resource.organization.id == input.auth.organization.id
     input.resource.user.id == input.auth.user.id
     input.resource.role != organizations.OWNER
-    utils.has_perm(utils.WORKER)
+    input.resource.role != organizations.SUPERVISOR
+    input.resource.role != organizations.WORKER
+    utils.has_perm(utils.BUSINESS)
 }

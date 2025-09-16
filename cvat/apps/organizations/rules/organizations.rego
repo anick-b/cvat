@@ -68,11 +68,11 @@ allow if {
 #    input.scope == utils.CREATE
 #    utils.has_perm(utils.USER)
 #}
-                                    #Added- BUSINESS owner can create
-allow if {
-    input.scope == utils.CREATE
-    utils.has_perm(utils.BUSINESS)
-}
+                                    #Removed- BUSINESS owner can create
+#allow if {
+#    input.scope == utils.CREATE
+#    utils.has_perm(utils.BUSINESS)
+#}
 
 filter := [] if { # Django Q object to filter list of entries
     utils.is_admin
@@ -95,11 +95,11 @@ allow if {
     input.resource.user.role != null
 }
 
-allow if {
-    input.scope == utils.UPDATE
-    utils.has_perm(utils.WORKER)
-    utils.is_resource_owner
-}
+#allow if {
+#    input.scope == utils.UPDATE
+#    utils.has_perm(utils.WORKER)
+#    utils.is_resource_owner
+#}
 
 allow if {
     input.scope == utils.UPDATE

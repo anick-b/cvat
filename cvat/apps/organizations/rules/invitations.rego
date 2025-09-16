@@ -32,9 +32,9 @@ import data.organizations
 
 default allow := false
                                     #Comment - Deny Admin
-#allow if {
-#    utils.is_admin
-#}
+allow if {
+    utils.is_admin
+}
                                     #Comment - Deny sandbox
 #allow if {
 #    input.scope == utils.LIST
@@ -83,9 +83,10 @@ allow if {
 
 allow if {
     input.scope == utils.CREATE
-    input.auth.organization.id == input.resource.organization.id
-    utils.has_perm(utils.ADMIN)
-    # a maintainer cannot invite an user with owner or  maintainer roles
+    #input.auth.organization.id == input.resource.organization.id
+    #utils.has_perm(utils.ADMIN)
+    utils.is_admin
+    # An admin cannot invite below roles
     input.resource.role != organizations.OWNER
     input.resource.role != organizations.SUPERVISOR
     input.resource.role != organizations.WORKER
