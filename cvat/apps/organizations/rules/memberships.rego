@@ -32,9 +32,9 @@ import data.organizations
 
 default allow := false
                                         #Comment- Admin privilege
-#allow if {
-#    utils.is_admin
-#}
+allow if {
+    utils.is_admin
+}
                                         #Comment-> Deny sandbox privilege
 #allow if {
 #    input.scope == utils.LIST
@@ -87,17 +87,18 @@ allow if {
                                         #Verify business logic
 # maintainer of the organization can change the role of any member and remove any member except
 # himself/another maintainer/owner
-allow if {
-    input.scope in {utils.CHANGE_ROLE, utils.DELETE}
-    input.resource.organization.id == input.auth.organization.id
-    utils.has_perm(utils.USER)
-    organizations.is_maintainer
-    not input.resource.role in {
-        organizations.OWNER,
-        organizations.MAINTAINER
-    }
-    input.resource.user.id != input.auth.user.id
-}
+#allow if {
+#    input.scope in {utils.CHANGE_ROLE, utils.DELETE}
+#    input.resource.organization.id == input.auth.organization.id
+#    utils.has_perm(utils.ADMIN)
+#    organizations.is_admin
+#    not input.resource.role in {
+#        organizations.SUPERVISOR,
+#        organizations.WORKER,
+#        organizations.USER
+#    }
+#    input.resource.user.id != input.auth.user.id
+#}
 
                                         #Verify business logic
 # owner of the organization can change the role of any member and remove any member except himself
@@ -109,6 +110,7 @@ allow if {
     organizations.is_maintainer
     input.resource.user.id != input.auth.user.id
     input.resource.role != organizations.OWNER
+    input.resource.role != organizations.MAINTAINER
 }
                                       #Verify business logic
 # member can leave the organization except case when member is the owner
@@ -116,6 +118,7 @@ allow if {
     input.scope == utils.DELETE
     input.resource.is_active
     organizations.is_member
+    utils.is_admin
     input.resource.organization.id == input.auth.organization.id
     input.resource.user.id == input.auth.user.id
     input.resource.role != organizations.OWNER
