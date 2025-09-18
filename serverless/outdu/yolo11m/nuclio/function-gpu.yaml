@@ -107,7 +107,7 @@ spec:
         - kind: RUN
           value: apt update && apt install --no-install-recommends -y wget python3-pip
         - kind: RUN
-         value: apt-get -y install libgl1-mesa-glx libglib2.0-dev
+          value: apt-get -y install libgl1-mesa-glx libglib2.0-dev
         - kind: RUN
           value: pip install torch torchvision opencv-python pillow pyyaml tqdm ultralytics msgpack
         - kind: WORKDIR
