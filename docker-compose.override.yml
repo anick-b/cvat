@@ -1,0 +1,9 @@
+services:
+  eaipannotator_server:
+    environment:
+      DJANGO_SETTINGS_MODULE: settings
+    volumes:
+      - type: bind
+        source: /app/apps/eaip/ldap/settings.py
+        target: /home/django/settings.py
+
