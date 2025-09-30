@@ -95,28 +95,26 @@ class Invitation(models.Model):
     def send(self, request):
         # Skip email sending if email backend is not configured
         # This allows the system to work without email configuration
-        if settings.EMAIL_BACKEND is None:
-            # Just mark as sent without actually sending email
+        if settings.EMAIL_BACKEND is not None:
+            # Auto-activate the invitation when email backend is not configured
+            target_email = self.membership.user.email
+            current_site = get_current_site(request)
+            site_name = current_site.name
+            domain = current_site.domain
+            context = {
+                "email": target_email,
+                "invitation_key": self.key,
+                "domain": domain,
+                "site_name": site_name,
+                "invitation_owner": self.owner.get_username(),
+                "organization_name": self.membership.organization.slug,
+                "protocol": "https" if request.is_secure() else "http",
+            }
+
+            get_adapter(request).send_mail("invitation/invitation", target_email, context)
+
+        else:
             self.accept()
-            self.sent_date = timezone.now()
-            self.save()
-            return
-
-        target_email = self.membership.user.email
-        current_site = get_current_site(request)
-        site_name = current_site.name
-        domain = current_site.domain
-        context = {
-            "email": target_email,
-            "invitation_key": self.key,
-            "domain": domain,
-            "site_name": site_name,
-            "invitation_owner": self.owner.get_username(),
-            "organization_name": self.membership.organization.slug,
-            "protocol": "https" if request.is_secure() else "http",
-        }
-
-        get_adapter(request).send_mail("invitation/invitation", target_email, context)
 
         self.sent_date = timezone.now()
         self.save()
